@@ -45,8 +45,10 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: #ECECEC;
+  --color-background: var(--background);
   --foreground: oklch(0.145 0 0);
+  --color-foreground: var(--foreground);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -79,8 +81,10 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: #ECECEC;
+  --color-background: var(--background);
   --foreground: oklch(0.985 0 0);
+  --color-foreground: var(--foreground);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -120,3 +124,13 @@
     @apply bg-background text-foreground;
   }
 }
+
+.hero-title {
+  --font-hero: 'Roboto', sans-serif;
+  --hero-font-size: 80px;
+  --hero-line-height: 100%;
+  --hero-letter-spacing: -0.03em;
+  --hero-color: #000000;
+}
+
+
