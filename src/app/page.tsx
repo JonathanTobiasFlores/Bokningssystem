@@ -16,7 +16,7 @@ export default function Home() {
         size="xl"
         className="absolute left-1/2 -translate-x-1/2 bottom-[53px]"
       >
-        <Link href="/booking" prefetch={false} scroll={false}>
+        <Link href="/booking">
           Boka
         </Link>
       </Button>

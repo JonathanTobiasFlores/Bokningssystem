@@ -1,37 +1,49 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { RoomSelector } from "@/components/booking/RoomSelector";
+import { TimeSlotGrid } from "@/components/booking/TimeSlotGrid";
+import { DateNavigator } from "@/components/booking/DateNavigator";
 
 export default function BookingPage() {
   return (
-    <div className="relative min-h-screen px-6 pt-20">
-      {/* Page title */}
-      <h1 className="page-title [font-family:var(--font-roboto)] [font-size:var(--title-font-size)] [line-height:var(--title-line-height)] [letter-spacing:var(--title-letter-spacing)] [color:var(--title-color)] font-normal w-[345px] h-[40px] absolute left-6 top-[80px]">
-        Välj en tid
-      </h1>
+    <main className="flex justify-center bg-[#ECECEC]">
+      <div className="bg-[#ECECEC] w-[393px] h-[852px] relative">
+        
+        {/* Title */}
+        <div className="absolute w-[345px] top-[79px] left-6 font-normal text-black text-[40px] tracking-[-1.20px] leading-10 font-['Roboto',_sans-serif]">
+          Välj en tid
+        </div>
 
-      {/* Room Selector */}
-      <div className="absolute top-[165px] left-6">
-        <RoomSelector />
+        {/* Room selector */}
+        <div className="absolute top-[165px] left-6">
+          <RoomSelector />
+        </div>
+
+        {/* Date navigation */}
+        <div className="absolute w-[345px] top-[250px] left-6">
+          <DateNavigator />
+        </div>
+
+        {/* Calendar grid */}
+        <div className="absolute w-[345px] h-[426px] top-[298px] left-6">
+          <TimeSlotGrid height={423} />
+        </div>
+
+        {/* Next button */}
+        <div className="absolute w-[345px] h-12 left-1/2 -translate-x-1/2 bottom-[53px]">
+          <Button
+            asChild
+            className="w-full h-full bg-[#1d1d1d] rounded-2xl text-white text-base hover:bg-[#1d1d1d]/90"
+          >
+            <Link href="/confirm">
+              Nästa
+            </Link>
+          </Button>
+        </div>
+
       </div>
-
-      {/* Calendar grid placeholder */}
-      <div className="absolute left-6 right-6 top-[260px] bottom-[130px] border rounded-lg bg-white/40 flex items-center justify-center text-muted">
-        {/* Replace with calendar component later */}
-        <span className="text-muted-foreground">[Calendar grid goes here]</span>
-      </div>
-
-      {/* CTA Next */}
-      <Button
-        asChild
-        variant="cta"
-        size="xl"
-        className="absolute left-1/2 -translate-x-1/2 bottom-[53px]"
-      >
-        <Link href="/confirm" prefetch={false} scroll={false}>
-          Nästa
-        </Link>
-      </Button>
-    </div>
+    </main>
   );
-} 
+}
