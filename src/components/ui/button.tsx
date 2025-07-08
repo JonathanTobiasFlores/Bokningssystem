@@ -21,6 +21,8 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 font-medium",
         link: "text-primary underline-offset-4 hover:underline",
         cta: "bg-[#1D1D1D] text-white border border-white/10 backdrop-blur-[25px] hover:bg-[#272727]",
+        popoverSelect: "bg-[#1D1D1D] text-white hover:bg-opacity-90",
+        popoverDeselect: "bg-[#3C3C3C] text-white hover:bg-opacity-90",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -28,6 +30,7 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
         xl: "h-12 w-[345px] rounded-[16px] px-4 gap-4 text-base font-normal leading-[1.4] text-center",
+        popover: "w-[144.5px] h-12 p-4 gap-4 rounded-[16px] border border-white/10 backdrop-blur-[25px] font-normal text-base leading-[1.4]",
       },
     },
     defaultVariants: {

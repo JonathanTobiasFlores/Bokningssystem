@@ -141,4 +141,15 @@
   --title-color: #000000;
 }
 
+@font-face {
+  font-family: 'Helvetica Neue LT Pro';
+  src: url('/fonts/HelveticaNeueLTProRoman.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+.font-helvetica {
+  font-family: 'Helvetica Neue LT Pro', sans-serif;
+}
+
 
