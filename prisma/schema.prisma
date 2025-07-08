@@ -12,8 +12,8 @@ datasource db {
 }
 
 model Room {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
   capacity  Int
   deletedAt DateTime?
 
@@ -26,7 +26,7 @@ model Room {
 }
 
 model TimeSlot {
-  id        Int    @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   startTime String
   endTime   String
 
@@ -34,7 +34,7 @@ model TimeSlot {
   bookings Booking[]
 
   // Unique constraint for time slot combination
-  @@unique([startTime, endTime])
+  @@unique([startTime, endTime], name: "startTime_endTime")
   @@map("time_slots")
 }
 

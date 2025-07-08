@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Seeding database...')
 
-  // Create time slots
+  // Create time slots (no id provided, unique on startTime+endTime)
   const timeSlots = [
     { startTime: '08:00', endTime: '09:00' },
     { startTime: '09:00', endTime: '10:00' },
@@ -20,13 +20,13 @@ async function main() {
 
   for (const slot of timeSlots) {
     await prisma.timeSlot.upsert({
-      where: { startTime_endTime: slot },
+      where: { startTime_endTime: { startTime: slot.startTime, endTime: slot.endTime } },
       update: {},
       create: slot,
     })
   }
 
-  // Create rooms
+  // Create rooms (no id provided, unique on name)
   const rooms = [
     { name: 'Conference Room A', capacity: 10 },
     { name: 'Conference Room B', capacity: 8 },
