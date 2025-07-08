@@ -9,24 +9,44 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown } from "lucide-react";
+import { useBookingStore } from "@/lib/store/booking";
+import type { Room } from "@/lib/types/room.types";
 
-const rooms = [
-  { id: "margret", name: "Margret", capacity: 4, checked: true },
-  { id: "steve", name: "Steve", capacity: 6, checked: true },
-  { id: "ada", name: "Ada", capacity: 10, checked: true },
-  { id: "edmund", name: "Edmund", capacity: 10, checked: false },
-  { id: "grace", name: "Grace", capacity: 20, checked: false },
+const allRooms: Room[] = [
+  { id: 1, name: "Margret", capacity: 4, createdAt: new Date(), updatedAt: new Date() },
+  { id: 2, name: "Steve", capacity: 6, createdAt: new Date(), updatedAt: new Date() },
+  { id: 3, name: "Ada", capacity: 10, createdAt: new Date(), updatedAt: new Date() },
+  { id: 4, name: "Edmund", capacity: 10, createdAt: new Date(), updatedAt: new Date() },
+  { id: 5, name: "Grace", capacity: 20, createdAt: new Date(), updatedAt: new Date() },
 ];
 
 export function RoomSelector() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const { selectedRooms, setSelectedRooms } = useBookingStore();
+
+  const handleRoomSelect = (room: Room) => {
+    const isSelected = selectedRooms.some((r) => r.id === room.id);
+    if (isSelected) {
+      setSelectedRooms(selectedRooms.filter((r) => r.id !== room.id));
+    } else {
+      setSelectedRooms([...selectedRooms, room]);
+    }
+  };
+
+  const handleConfirm = () => {
+    setIsOpen(false);
+  }
+
+  const handleDeselectAll = () => {
+    setSelectedRooms([]);
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="font-helvetica w-[164px] h-[45px] justify-between p-4 rounded-lg border border-[#BDBDBD] bg-background text-[#212121] text-[18px] font-normal hover:bg-gray-200 hover:text-[#212121]"
+          className="font-helvetica w-[164px] h-[45px] justify-between p-4 rounded-lg border border-[#BDBDBD] text-[#212121] text-[18px] font-normal hover:text-[#212121]"
         >
           Mötesrum{" "}
           <ChevronDown
@@ -42,23 +62,33 @@ export function RoomSelector() {
       >
         <div className="space-y-4">
           <div className="space-y-4">
-            {rooms.map((room) => (
+            {allRooms.map((room) => (
               <div key={room.id} className="flex items-center justify-between">
                 <label
-                  htmlFor={room.id}
+                  htmlFor={String(room.id)}
                   className="font-normal text-base leading-[1.2] tracking-[-0.01em] text-black"
                 >
                   {room.name} ({room.capacity} personer)
                 </label>
-                <Checkbox id={room.id} checked={room.checked} />
+                <Checkbox 
+                  id={String(room.id)} 
+                  checked={selectedRooms.some(r => r.id === room.id)}
+                  onCheckedChange={() => handleRoomSelect(room)}
+                />
               </div>
             ))}
           </div>
-          <div className="flex justify-between pt-4">
-            <Button variant="popoverSelect" size="popover">
+          <div className="flex justify-between items-center pt-4">
+            <Button
+              onClick={handleConfirm}
+              className="w-[145px] h-[48px] p-4 rounded-2xl bg-[#1D1D1D] text-white border border-white/10 backdrop-blur-[25px] flex items-center justify-center"
+            >
               Välj
             </Button>
-            <Button variant="popoverDeselect" size="popover">
+            <Button
+              onClick={handleDeselectAll}
+              className="w-[145px] h-[48px] p-4 rounded-2xl bg-[#3C3C3C] text-white border border-white/10 backdrop-blur-[25px] flex items-center justify-center"
+            >
               Avmarkera
             </Button>
           </div>
