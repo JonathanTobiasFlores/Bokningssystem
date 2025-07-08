@@ -3,10 +3,38 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model Room {
+  id        Int   @id @default(autoincrement())
+  name      String
+  capacity  Int
+  bookings  Booking[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("rooms")
+}
+
+model Booking {
+  id         Int   @id @default(autoincrement())
+  roomId     String
+  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  bookerName String
+  date       DateTime @db.Date
+  startTime  String
+  endTime    String
+  status     String   @default("confirmed")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@index([roomId, date])
+  @@index([date, status])
+  @@unique([roomId, date, startTime, endTime])
+  @@map("bookings")
 }
