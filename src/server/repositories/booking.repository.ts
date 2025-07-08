@@ -39,14 +39,30 @@ export class BookingRepository {
   }
 
   async create(data: CreateBookingData): Promise<Booking> {
+    const {
+      roomId,
+      bookerName,
+      date,
+      startTime,
+      endTime,
+      status,
+      timeSlotId
+    } = data;
+
+    // Defensive: ensure timeSlotId is present and valid
+    if (typeof timeSlotId !== 'number' || isNaN(timeSlotId)) {
+      throw new Error('Invalid or missing timeSlotId');
+    }
+
     const booking = await this.prisma.booking.create({
       data: {
-        roomId: data.roomId,
-        bookerName: data.bookerName,
-        date: new Date(data.date),
-        startTime: data.startTime,
-        endTime: data.endTime,
-        status: data.status
+        roomId,
+        userName: bookerName,
+        date: new Date(date),
+        startTime,
+        endTime,
+        status,
+        timeSlotId
       },
       include: { room: true }
     });
@@ -105,8 +121,10 @@ export class BookingRepository {
     return {
       id: data.id,
       roomId: data.roomId,
+      timeSlotId: data.timeSlotId,
       roomName: data.room.name,
-      bookerName: data.bookerName,
+      bookerName: data.userName,
+      userName: data.userName,
       date: data.date.toISOString().split('T')[0],
       startTime: data.startTime,
       endTime: data.endTime,

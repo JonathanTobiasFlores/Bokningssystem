@@ -45,6 +45,16 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    // Parse timeSlotId as number before validation
+    if (typeof body.timeSlotId === 'string') {
+      body.timeSlotId = Number(body.timeSlotId);
+    }
+    if (typeof body.timeSlotId !== 'number' || isNaN(body.timeSlotId)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid timeSlotId' },
+        { status: 400 }
+      );
+    }
     const validatedData = CreateBookingSchema.parse(body);
 
     // 2. Call service layer (business logic)

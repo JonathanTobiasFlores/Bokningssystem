@@ -5,7 +5,8 @@ export const CreateBookingSchema = z.object({
   bookerName: z.string().min(1).max(100),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   startTime: z.string().regex(/^\d{2}:\d{2}$/),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/)
+  endTime: z.string().regex(/^\d{2}:\d{2}$/),
+  timeSlotId: z.number()
 }).refine((data) => {
   // Ensure end time is after start time
   return data.endTime > data.startTime;

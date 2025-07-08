@@ -40,8 +40,13 @@ export class BookingService {
 
     // 3. Create booking
     return this.bookingRepo.create({
-      ...data,
-      status: 'confirmed'
+      roomId: data.roomId,
+      bookerName: data.bookerName,
+      date: data.date,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      status: 'confirmed',
+      timeSlotId: data.timeSlotId
     });
   }
 
