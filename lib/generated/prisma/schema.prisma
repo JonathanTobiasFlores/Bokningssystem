@@ -1,0 +1,56 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Room {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
+  capacity  Int
+  deletedAt DateTime?
+
+  // Relations
+  bookings Booking[]
+
+  // Index for soft delete performance
+  @@index([deletedAt])
+  @@map("rooms")
+}
+
+model TimeSlot {
+  id        Int    @id @default(autoincrement())
+  startTime String
+  endTime   String
+
+  // Relations
+  bookings Booking[]
+
+  // Unique constraint for time slot combination
+  @@unique([startTime, endTime])
+  @@map("time_slots")
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  roomId     Int
+  userName   String
+  date       DateTime
+  timeSlotId Int
+  createdAt  DateTime @default(now())
+
+  // Relations
+  room     Room     @relation(fields: [roomId], references: [id])
+  timeSlot TimeSlot @relation(fields: [timeSlotId], references: [id])
+
+  // Prevent double bookings
+  @@unique([roomId, date, timeSlotId])
+  @@map("bookings")
+}

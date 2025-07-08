@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  // output   = "../lib/generated/prisma"
 }
 
 datasource db {
@@ -11,30 +12,45 @@ datasource db {
 }
 
 model Room {
-  id        Int   @id @default(autoincrement())
-  name      String
+  id        Int       @id @default(autoincrement())
+  name      String    @unique
   capacity  Int
-  bookings  Booking[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
+  deletedAt DateTime?
+
+  // Relations
+  bookings Booking[]
+
+  // Index for soft delete performance
+  @@index([deletedAt])
   @@map("rooms")
 }
 
+model TimeSlot {
+  id        Int    @id @default(autoincrement())
+  startTime String
+  endTime   String
+
+  // Relations
+  bookings Booking[]
+
+  // Unique constraint for time slot combination
+  @@unique([startTime, endTime])
+  @@map("time_slots")
+}
+
 model Booking {
-  id         Int   @id @default(autoincrement())
-  roomId     String
-  room       Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  bookerName String
-  date       DateTime @db.Date
-  startTime  String
-  endTime    String
-  status     String   @default("confirmed")
+  id         Int      @id @default(autoincrement())
+  roomId     Int
+  userName   String
+  date       DateTime
+  timeSlotId Int
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  
-  @@index([roomId, date])
-  @@index([date, status])
-  @@unique([roomId, date, startTime, endTime])
+
+  // Relations
+  room     Room     @relation(fields: [roomId], references: [id])
+  timeSlot TimeSlot @relation(fields: [timeSlotId], references: [id])
+
+  // Prevent double bookings
+  @@unique([roomId, date, timeSlotId])
   @@map("bookings")
 }
