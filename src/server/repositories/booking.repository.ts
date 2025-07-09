@@ -90,10 +90,9 @@ export class BookingRepository {
   }
 
   async hasTimeConflict(
-    roomId: number, 
-    date: string, 
-    startTime: string, 
-    endTime: string,
+    roomId: number,
+    date: string,
+    startTime: string,
     tx?: PrismaTransactionalClient
   ): Promise<boolean> {
     const prismaClient = tx || this.prisma;
@@ -101,12 +100,10 @@ export class BookingRepository {
       where: {
         roomId,
         date: toUTCDate(date),
+        startTime: startTime,
         status: 'confirmed',
-        startTime,
-        endTime
-      }
+      },
     });
-  
     return count > 0;
   }
 

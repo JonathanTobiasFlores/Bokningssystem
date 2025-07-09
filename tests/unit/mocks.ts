@@ -1,5 +1,9 @@
 import { vi } from 'vitest';
 
+export const makePrisma = () => ({
+  $transaction: vi.fn().mockImplementation(async (callback) => callback(this)),
+});
+
 export const makeBookingRepo = (overrides: Partial<any> = {}) => ({
   findMany: vi.fn().mockResolvedValue([]),
   findById: vi.fn().mockResolvedValue(null),

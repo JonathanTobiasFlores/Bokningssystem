@@ -44,6 +44,9 @@ export class BookingService {
     if (differenceInDays(bookingDate, today) > maxDays) {
       throw new BookingDateOutOfRangeError(maxDays);
     }
+    if (bookingDate < today) {
+      throw new BookingInPastError();
+    }
 
     if (isToday(bookingDate)) {
       const now = getZonedTime(new Date());
@@ -63,32 +66,41 @@ export class BookingService {
 
     // 3. Transactional booking creation
     return this.prisma.$transaction(async (tx) => {
+      // Proactively check for conflict for immediate feedback
       const hasConflict = await this.bookingRepo.hasTimeConflict(
         data.roomId,
         data.date,
         data.startTime,
-        data.endTime,
         tx
       );
-
       if (hasConflict) {
         throw new BookingConflictError(
           `Time slot ${data.startTime}-${data.endTime} is already booked`
         );
       }
-
-      return this.bookingRepo.create(
-        {
-          roomId: data.roomId,
-          bookerName: data.bookerName,
-          date: data.date,
-          startTime: data.startTime,
-          endTime: data.endTime,
-          status: 'confirmed',
-          timeSlotId: data.timeSlotId,
-        },
-        tx
-      );
+      
+      try {
+        return await this.bookingRepo.create(
+          {
+            roomId: data.roomId,
+            bookerName: data.bookerName,
+            date: data.date,
+            startTime: data.startTime,
+            endTime: data.endTime,
+            status: 'confirmed',
+            timeSlotId: data.timeSlotId,
+          },
+          tx
+        );
+      } catch (error: any) {
+        // Handle unique constraint violation for race conditions
+        if (error.code === 'P2002') {
+          throw new BookingConflictError(
+            `Time slot ${data.startTime}-${data.endTime} is already booked`
+          );
+        }
+        throw error;
+      }
     });
   }
 
