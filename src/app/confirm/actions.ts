@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { bookingService } from "@/server/services";
 import { BookingConflictError } from "@/lib/errors/booking.errors";
+import { toUTCDate, toDBDateString } from "@/lib/utils/dateHelpers";
 
 export interface FormState {
   message: string;
@@ -47,9 +48,9 @@ export async function bookSlotAction(
     const lastHyphenIndex = slotId.lastIndexOf('-');
     const timeSlotId = parseInt(slotId.substring(lastHyphenIndex + 1), 10);
     
-    // Everything between first and last hyphen is the date
+    // Everything between first and last hyphen is the date (ISO string)
     const dateISO = slotId.substring(firstHyphenIndex + 1, lastHyphenIndex);
-    const date = new Date(dateISO);
+    const date = toUTCDate(dateISO);
   
     console.log("Parsed values:", { roomId, timeSlotId, dateISO, date });
   
@@ -66,7 +67,7 @@ export async function bookSlotAction(
     await bookingService.createBooking({
       bookerName: name,
       roomId,
-      date: date.toISOString().split("T")[0], // YYYY-MM-DD
+      date: toDBDateString(date),
       timeSlotId,
       startTime: tempTimeSlotData.startTime,
       endTime: tempTimeSlotData.endTime,

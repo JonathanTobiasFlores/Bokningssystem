@@ -1,6 +1,7 @@
 import { TimeSlotRepository } from "../repositories/timeSlot.repository";
 import { RoomRepository } from "../repositories/room.repository";
 import { eachDayOfInterval, formatISO, startOfDay } from "date-fns";
+import { toISOStringLocal } from "@/lib/utils/dateHelpers";
 import type { TimeSlot as PrismaTimeSlot } from '@prisma/client';
 
 interface GetAvailableTimeSlotsParams {
@@ -55,7 +56,7 @@ export class TimeSlotService {
                 const isBooked = bookingsSet.has(bookingId);
 
                 availableSlots.push({
-                    id: `${room.id}-${slotDate.toISOString()}-${prismaSlot.id}`,
+                    id: `${room.id}-${toISOStringLocal(slotDate)}-${prismaSlot.id}`,
                     roomName: room.name,
                     roomId: room.id,
                     capacity: room.capacity,

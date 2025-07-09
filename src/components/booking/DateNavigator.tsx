@@ -4,6 +4,7 @@ import * as React from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useBookingStore } from "@/lib/store/booking";
 import { format, addDays, startOfDay } from "date-fns";
+import { toUTCDate } from "@/lib/utils/dateHelpers";
 import { config } from "@/lib/config";
 
 export function DateNavigator() {
@@ -18,7 +19,7 @@ export function DateNavigator() {
   )}`;
 
   const canGoPrevious = () => {
-    const today = startOfDay(new Date());
+    const today = startOfDay(toUTCDate(new Date()));
     const newDate = addDays(selectedDate, -config.booking.navigationStep)
     return newDate >= today || config.booking.allowPastDates;
   }

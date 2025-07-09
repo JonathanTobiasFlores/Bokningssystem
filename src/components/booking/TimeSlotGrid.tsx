@@ -1,7 +1,8 @@
 "use client";
 
 import { useBookingStore } from "@/lib/store/booking";
-import { format, addDays, startOfDay, formatISO } from "date-fns";
+import { format, addDays, startOfDay } from "date-fns";
+import { toISOStringLocal, fromUTCDate } from "@/lib/utils/dateHelpers";
 import { sv } from "date-fns/locale";
 import React, { memo } from "react";
 import { VirtualizedDayColumn } from "@/components/booking/VirtualizedDayColumn";
@@ -40,8 +41,8 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
       const roomIds = selectedRooms.map(r => r.id).join(',');
 
       const query = new URLSearchParams({
-        startDate: formatISO(startDate),
-        endDate: formatISO(endDate),
+        startDate: toISOStringLocal(startDate),
+        endDate: toISOStringLocal(endDate),
         roomIds,
       }).toString();
 
@@ -54,7 +55,7 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
         // The API returns dates as strings, so we need to convert them back to Date objects
         const slotsWithDates = data.data.map((slot: any) => ({
           ...slot,
-          date: new Date(slot.date),
+          date: fromUTCDate(slot.date),
         }));
         setAllSlots(slotsWithDates);
       } catch (error) {

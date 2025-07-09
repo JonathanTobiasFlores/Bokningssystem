@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timeSlotService } from "@/server/services";
-import { startOfDay, endOfDay, parseISO } from "date-fns";
+import { startOfDay, endOfDay } from "date-fns";
+import { toUTCDate } from "@/lib/utils/dateHelpers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,8 +17,8 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const startDate = startOfDay(parseISO(startDateParam));
-    const endDate = endOfDay(parseISO(endDateParam));
+    const startDate = startOfDay(toUTCDate(startDateParam));
+    const endDate = endOfDay(toUTCDate(endDateParam));
     const roomIds = roomIdsParam ? roomIdsParam.split(',').map(Number) : [];
 
     const timeSlots = await timeSlotService.getAvailableTimeSlots({

@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient, Room as PrismaRoom } from "@prisma/client";
 import { Room, RoomWithBookings } from "@/lib/types/room.types";
+import { toUTCDate } from "@/lib/utils/dateHelpers";
 
 type PrismaRoomWithBookings = Prisma.RoomGetPayload<{
   include: { bookings: { select: { startTime: true; endTime: true } } };
@@ -63,7 +64,7 @@ export class RoomRepository {
   }
 
   async getRoomsWithAvailability(date: string): Promise<RoomWithBookings[]> {
-    const targetDate = new Date(date);
+    const targetDate = toUTCDate(date);
     const roomsWithBookings = await this.prisma.room.findMany({
       where: { deletedAt: null },
       include: {

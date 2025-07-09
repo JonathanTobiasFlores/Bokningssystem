@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Booking, BookingWithRoom, CreateBookingData } from '@/lib/types/booking.types';
+import { toUTCDate, toDBDateString } from '@/lib/utils/dateHelpers';
 
 export class BookingRepository {
   constructor(private prisma: PrismaClient) {}
@@ -8,7 +9,7 @@ export class BookingRepository {
     const where: Record<string, unknown> = {};
     
     if (filters.date) {
-      where.date = new Date(filters.date);
+      where.date = toUTCDate(filters.date);
     }
     
     if (filters.roomId) {
@@ -58,7 +59,7 @@ export class BookingRepository {
       data: {
         roomId,
         userName: bookerName,
-        date: new Date(date),
+        date: toUTCDate(date),
         startTime,
         endTime,
         status,
@@ -89,7 +90,7 @@ export class BookingRepository {
     const count = await this.prisma.booking.count({
       where: {
         roomId,
-        date: new Date(date),
+        date: toUTCDate(date),
         status: 'confirmed',
         startTime,
         endTime
@@ -107,7 +108,7 @@ export class BookingRepository {
       roomName: data.room.name,
       bookerName: data.userName,
       userName: data.userName,
-      date: data.date.toISOString().split('T')[0],
+      date: toDBDateString(data.date),
       startTime: data.startTime,
       endTime: data.endTime,
       status: data.status as 'confirmed' | 'cancelled',
