@@ -4,9 +4,13 @@ import { TimeSlotRepository } from '../repositories/timeSlot.repository';
 import { CreateBookingDto } from '@/server/validations/booking.schema';
 import { 
   BookingConflictError, 
-  RoomNotFoundError 
+  RoomNotFoundError,
+  BookingDateOutOfRangeError
 } from '@/lib/errors/booking.errors';
 import { Booking } from '@/lib/types/booking.types';
+import { differenceInDays, startOfDay } from 'date-fns';
+import { toUTCDate } from '@/lib/utils/dateHelpers';
+import { config } from '@/lib/config';
 
 export class BookingService {
   constructor(
@@ -31,6 +35,15 @@ export class BookingService {
     }
 
     // 2. Check for conflicts
+
+    // Business rule: booking cannot be more than maxAdvanceDays ahead
+    const maxDays = config.booking.maxAdvanceDays;
+    const bookingDate = startOfDay(toUTCDate(data.date));
+    const today = startOfDay(toUTCDate(new Date()));
+    if (differenceInDays(bookingDate, today) > maxDays) {
+      throw new BookingDateOutOfRangeError(maxDays);
+    }
+
     const hasConflict = await this.bookingRepo.hasTimeConflict(
       data.roomId,
       data.date,

@@ -11,3 +11,9 @@ export class RoomNotFoundError extends ApiError {
     super(`Room ${roomId} not found`, 404, 'ROOM_NOT_FOUND');
   }
 }
+
+export class BookingDateOutOfRangeError extends ApiError {
+  constructor(maxDays: number) {
+    super(`Bookings can only be made up to ${maxDays} days in advance`, 400, 'DATE_OUT_OF_RANGE');
+  }
+}

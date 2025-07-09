@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { timeSlotService } from "@/server/services";
-import { startOfDay, endOfDay } from "date-fns";
+import { startOfDay, endOfDay, differenceInDays } from "date-fns";
 import { toUTCDate } from "@/lib/utils/dateHelpers";
+import { isValid } from "date-fns";
+import { config } from "@/lib/config";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,8 +19,27 @@ export async function GET(request: NextRequest) {
       );
     }
     
-    const startDate = startOfDay(toUTCDate(startDateParam));
-    const endDate = endOfDay(toUTCDate(endDateParam));
+    const startDateRaw = toUTCDate(startDateParam);
+    const endDateRaw = toUTCDate(endDateParam);
+
+    if (!isValid(startDateRaw) || !isValid(endDateRaw)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid date format" },
+        { status: 400 }
+      );
+    }
+
+    const startDate = startOfDay(startDateRaw);
+    const endDate = endOfDay(endDateRaw);
+
+    // business rule: cannot request beyond maxAdvanceDays
+    if (differenceInDays(endDate, new Date()) > config.booking.maxAdvanceDays) {
+      return NextResponse.json(
+        { success: false, error: `Date range exceeds ${config.booking.maxAdvanceDays} days limit` },
+        { status: 400 }
+      );
+    }
+
     const roomIds = roomIdsParam ? roomIdsParam.split(',').map(Number) : [];
 
     const timeSlots = await timeSlotService.getAvailableTimeSlots({
