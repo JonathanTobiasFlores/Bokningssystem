@@ -72,7 +72,7 @@ export function RoomSelector() {
         className="w-[345px] bg-[#ECECEC] border-[#BDBDBD] shadow-[0px_4px_16px_rgba(66,66,66,0.35)] rounded-lg p-6"
       >
         <div className="space-y-4">
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2 hide-scrollbar">
             {allRooms.map((room) => (
               <div key={room.id} className="flex items-center justify-between">
                 <label

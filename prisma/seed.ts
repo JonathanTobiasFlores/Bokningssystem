@@ -28,11 +28,18 @@ async function main() {
 
   // Create rooms (no id provided, unique on name)
   const rooms = [
-    { name: 'Conference Room A', capacity: 10 },
-    { name: 'Conference Room B', capacity: 8 },
-    { name: 'Meeting Room 1', capacity: 4 },
-    { name: 'Meeting Room 2', capacity: 6 },
-    { name: 'Board Room', capacity: 12 },
+    { name: 'Stora konferensrummet', capacity: 10 },
+    { name: 'Lilla konferensrummet', capacity: 8 },
+    { name: 'Mötesrum 1', capacity: 4 },
+    { name: 'Mötesrum 2', capacity: 6 },
+    { name: 'Styrelserummet', capacity: 12 },
+    { name: 'Projekt Alfa', capacity: 5 },
+    { name: 'Projekt Beta', capacity: 5 },
+    { name: 'Kreativa hörnan', capacity: 4 },
+    { name: 'Fokusrum 1', capacity: 1 },
+    { name: 'Fokusrum 2', capacity: 1 },
+    { name: 'Flex-rummet', capacity: 8 },
+    { name: 'Event-ytan', capacity: 50 },
   ]
 
   for (const room of rooms) {
