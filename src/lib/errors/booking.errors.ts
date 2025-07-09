@@ -17,3 +17,9 @@ export class BookingDateOutOfRangeError extends ApiError {
     super(`Bookings can only be made up to ${maxDays} days in advance`, 400, 'DATE_OUT_OF_RANGE');
   }
 }
+
+export class BookingInPastError extends ApiError {
+  constructor() {
+    super('Cannot book a time slot that is in the past', 400, 'BOOKING_IN_PAST');
+  }
+}

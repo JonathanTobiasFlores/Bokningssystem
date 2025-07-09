@@ -48,4 +48,8 @@ export const formatDisplayDate = (date: Date | string): string => {
 // ISO string that preserves timezone information
 export const toISOStringLocal = (date: Date): string => {
   return dateFnsFormatISO(date);
-}; 
+};
+
+export const getZonedTime = (date: Date, timeZone = 'Europe/Stockholm') => {
+  return utcToZonedTime(date, timeZone);
+} 

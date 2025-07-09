@@ -5,11 +5,12 @@ import { CreateBookingDto } from '@/server/validations/booking.schema';
 import { 
   BookingConflictError, 
   RoomNotFoundError,
-  BookingDateOutOfRangeError
+  BookingDateOutOfRangeError,
+  BookingInPastError
 } from '@/lib/errors/booking.errors';
 import { Booking } from '@/lib/types/booking.types';
-import { differenceInDays, startOfDay } from 'date-fns';
-import { toUTCDate } from '@/lib/utils/dateHelpers';
+import { differenceInDays, startOfDay, isToday, parse } from 'date-fns';
+import { toUTCDate, getZonedTime } from '@/lib/utils/dateHelpers';
 import { config } from '@/lib/config';
 
 export class BookingService {
@@ -42,6 +43,23 @@ export class BookingService {
     const today = startOfDay(toUTCDate(new Date()));
     if (differenceInDays(bookingDate, today) > maxDays) {
       throw new BookingDateOutOfRangeError(maxDays);
+    }
+    
+    // Business rule: prevent booking a time slot that has already passed today
+    if (isToday(bookingDate)) {
+      const now = getZonedTime(new Date());
+      const slotStartTime = parse(data.startTime, 'HH:mm', new Date());
+      const slotDateTime = new Date(
+        bookingDate.getFullYear(),
+        bookingDate.getMonth(),
+        bookingDate.getDate(),
+        slotStartTime.getHours(),
+        slotStartTime.getMinutes()
+      );
+
+      if (now > slotDateTime) {
+        throw new BookingInPastError();
+      }
     }
 
     const hasConflict = await this.bookingRepo.hasTimeConflict(

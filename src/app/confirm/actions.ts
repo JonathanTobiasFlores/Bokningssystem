@@ -2,7 +2,10 @@
 
 import { z } from "zod";
 import { bookingService } from "@/server/services";
-import { BookingConflictError } from "@/lib/errors/booking.errors";
+import {
+  BookingConflictError,
+  BookingInPastError,
+} from "@/lib/errors/booking.errors";
 import { toUTCDate, toDBDateString } from "@/lib/utils/dateHelpers";
 
 export interface FormState {
@@ -76,7 +79,7 @@ export async function bookSlotAction(
     return { message: "Bokning bekräftad!" };
   
   } catch (error) {
-    if (error instanceof BookingConflictError) {
+    if (error instanceof BookingConflictError || error instanceof BookingInPastError) {
       return { message: error.message };
     }
     console.error("Booking failed:", error);

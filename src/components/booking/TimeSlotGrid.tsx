@@ -1,8 +1,8 @@
 "use client";
 
 import { useBookingStore } from "@/lib/store/booking";
-import { format, addDays, startOfDay } from "date-fns";
-import { toISOStringLocal, fromUTCDate } from "@/lib/utils/dateHelpers";
+import { format, addDays, startOfDay, isToday, parse } from "date-fns";
+import { toISOStringLocal, fromUTCDate, getZonedTime } from "@/lib/utils/dateHelpers";
 import { sv } from "date-fns/locale";
 import React, { memo } from "react";
 import { VirtualizedDayColumn } from "@/components/booking/VirtualizedDayColumn";
@@ -102,13 +102,34 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
         ))}
       </div>
 
-      {/* Time slots with virtualized scrolling */}
+      {/* Time slots with virtualized git ing */}
       <div style={{ ...gridStyle, height: `${height - 40}px` }}>
         {dates.map((date) => {
-          const daySlots = allSlots.filter(
+          let daySlots = allSlots.filter(
             (slot) =>
               startOfDay(slot.date).getTime() === startOfDay(date).getTime()
           );
+
+          // Disable past time slots for today
+          if (isToday(date)) {
+            const now = getZonedTime(new Date());
+            daySlots = daySlots.map(slot => {
+              const slotStartTime = parse(slot.startTime, 'HH:mm', new Date());
+              const slotDateTime = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate(),
+                slotStartTime.getHours(),
+                slotStartTime.getMinutes()
+              );
+              
+              if (now > slotDateTime) {
+                return { ...slot, available: false };
+              }
+              return slot;
+            })
+          }
+
           return (
             <VirtualizedDayColumn
               key={date.toISOString()}
