@@ -59,7 +59,6 @@ export class BookingRepository {
       timeSlotId
     } = data;
 
-    // Defensive: ensure timeSlotId is present and valid
     if (typeof timeSlotId !== 'number' || isNaN(timeSlotId)) {
       throw new Error('Invalid or missing timeSlotId');
     }

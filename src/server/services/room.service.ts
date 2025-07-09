@@ -1,5 +1,5 @@
 import { RoomRepository } from '@/server/repositories/room.repository';
-import { generateTimeSlots } from '@/lib/utils/dates';
+import { generateTimeSlots } from '@/lib/utils/dateHelpers';
 import { z } from 'zod';
 import { RoomWithBookings } from '@/lib/types/room.types';
 

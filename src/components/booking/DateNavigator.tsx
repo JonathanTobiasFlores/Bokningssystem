@@ -28,7 +28,6 @@ export function DateNavigator() {
 
   const canGoNext = () => {
     const today = startOfDay(new Date());
-    // Calculate the end date of the *next* navigation step
     const nextRangeEndDate = addDays(
       selectedDate,
       2 * config.booking.navigationStep - 1

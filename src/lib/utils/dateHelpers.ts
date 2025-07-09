@@ -1,4 +1,4 @@
-import { format, parseISO, isBefore, addMinutes } from 'date-fns';
+import { format, parseISO, isBefore, addMinutes, addDays } from 'date-fns';
 import { formatISO as dateFnsFormatISO } from 'date-fns';
 import { sv } from 'date-fns/locale';
 import { toZonedTime as utcToZonedTime, fromZonedTime as zonedTimeToUtc } from 'date-fns-tz';
@@ -52,4 +52,28 @@ export const toISOStringLocal = (date: Date): string => {
 
 export const getZonedTime = (date: Date, timeZone = 'Europe/Stockholm') => {
   return utcToZonedTime(date, timeZone);
+};
+
+/**
+ * Generate time slots for the booking system
+ *
+ */
+export function generateTimeSlots() {
+  const slots = [];
+  const hours = [8, 10, 11, 13, 14, 16];
+
+  for (const hour of hours) {
+    const start = `${hour.toString().padStart(2, '0')}:00`;
+    const end = `${(hour + 1).toString().padStart(2, '0')}:00`;
+    slots.push({ start, end });
+  }
+
+  return slots;
+}
+
+/**
+ * Get date range for the booking calendar
+ */
+export function getDateRange(startDate: Date, days: number = 3): Date[] {
+  return Array.from({ length: days }, (_, i) => addDays(startDate, i));
 } 
