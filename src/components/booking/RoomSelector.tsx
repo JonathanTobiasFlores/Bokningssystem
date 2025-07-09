@@ -8,17 +8,19 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { useBookingStore } from "@/lib/store/booking";
 import type { Room } from "@/lib/types/room.types";
 
 export function RoomSelector() {
   const [isOpen, setIsOpen] = React.useState(false);
   const [allRooms, setAllRooms] = React.useState<Room[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
   const { selectedRooms, setSelectedRooms } = useBookingStore();
 
   React.useEffect(() => {
     const fetchRooms = async () => {
+      setIsLoading(true);
       try {
         const response = await fetch("/api/rooms");
         if (!response.ok) {
@@ -28,11 +30,15 @@ export function RoomSelector() {
         setAllRooms(data.data);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchRooms();
-  }, []);
+    if (isOpen) {
+      fetchRooms();
+    }
+  }, [isOpen]);
 
   const handleRoomSelect = (room: Room) => {
     const isSelected = selectedRooms.some((r) => r.id === room.id);
@@ -81,39 +87,48 @@ export function RoomSelector() {
         align="start"
         className="w-[345px] bg-[#ECECEC] border-[#BDBDBD] shadow-[0px_4px_16px_rgba(66,66,66,0.35)] rounded-lg p-6"
       >
-        <div className="space-y-4">
-          <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2 hide-scrollbar">
-            {allRooms.map((room) => (
-              <div key={room.id} className="flex items-center justify-between">
-                <label
-                  htmlFor={String(room.id)}
-                  className="font-normal text-base leading-[1.2] tracking-[-0.01em] text-black"
+        {isLoading ? (
+          <div className="flex items-center justify-center min-h-[280px]">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2 hide-scrollbar">
+              {allRooms.map((room) => (
+                <div
+                  key={room.id}
+                  className="flex items-center justify-between"
                 >
-                  {room.name} ({room.capacity} personer)
-                </label>
-                <Checkbox 
-                  id={String(room.id)} 
-                  checked={selectedRooms.some(r => r.id === room.id)}
-                  onCheckedChange={() => handleRoomSelect(room)}
-                />
-              </div>
-            ))}
+                  <label
+                    htmlFor={String(room.id)}
+                    className="font-normal text-base leading-[1.2] tracking-[-0.01em] text-black"
+                  >
+                    {room.name} ({room.capacity} personer)
+                  </label>
+                  <Checkbox
+                    id={String(room.id)}
+                    checked={selectedRooms.some((r) => r.id === room.id)}
+                    onCheckedChange={() => handleRoomSelect(room)}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-between items-center pt-4">
+              <Button
+                onClick={handleConfirm}
+                className="w-[145px] h-[48px] p-4 rounded-2xl bg-[#1D1D1D] text-white border border-white/10 backdrop-blur-[25px] flex items-center justify-center"
+              >
+                Välj
+              </Button>
+              <Button
+                onClick={handleDeselectAll}
+                className="w-[145px] h-[48px] p-4 rounded-2xl bg-[#3C3C3C] text-white border border-white/10 backdrop-blur-[25px] flex items-center justify-center"
+              >
+                Avmarkera
+              </Button>
+            </div>
           </div>
-          <div className="flex justify-between items-center pt-4">
-            <Button
-              onClick={handleConfirm}
-              className="w-[145px] h-[48px] p-4 rounded-2xl bg-[#1D1D1D] text-white border border-white/10 backdrop-blur-[25px] flex items-center justify-center"
-            >
-              Välj
-            </Button>
-            <Button
-              onClick={handleDeselectAll}
-              className="w-[145px] h-[48px] p-4 rounded-2xl bg-[#3C3C3C] text-white border border-white/10 backdrop-blur-[25px] flex items-center justify-center"
-            >
-              Avmarkera
-            </Button>
-          </div>
-        </div>
+        )}
       </PopoverContent>
     </Popover>
   );
