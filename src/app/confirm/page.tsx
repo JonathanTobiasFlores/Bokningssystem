@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { redirect, useRouter } from "next/navigation";
 import { useBookingStore } from "@/lib/store/booking";
 import { bookSlotAction, type FormState } from "./actions";
@@ -16,18 +16,11 @@ import {
 } from "@/components/ui/dialog";
 import { SmileIcon } from "lucide-react";
 
-function SubmitButton({ isPending }: { isPending: boolean }) {
-  return (
-    <Button type="submit" disabled={isPending} variant="cta" size="xl">
-      {isPending ? "Bokar..." : "Boka"}
-    </Button>
-  );
-}
-
 export default function ConfirmPage() {
   const router = useRouter();
   const selectedSlot = useBookingStore((state) => state.selectedSlot);
   const resetBookingState = useBookingStore((state) => state.resetBookingState);
+  const [name, setName] = useState("");
 
   const initialState: FormState = {
     message: "",
@@ -62,6 +55,8 @@ export default function ConfirmPage() {
     return null;
   }
 
+  const isFormValid = name.trim() !== "";
+
   return (
     <>
       <div className="bg-[#ececec] flex flex-row justify-center w-full min-h-screen">
@@ -84,6 +79,8 @@ export default function ConfirmPage() {
                 <Input
                   id="name"
                   name="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="h-[45px] text-lg text-[#000000] border-[#bdbdbd] rounded-lg"
                   placeholder="Skriv ditt fullständiga namn här"
                   required
@@ -95,7 +92,15 @@ export default function ConfirmPage() {
               )}
 
               <div className="absolute w-[345px] h-12 left-1/2 -translate-x-1/2 bottom-[53px]">
-                <SubmitButton isPending={isPending} />
+                <Button
+                  type="submit"
+                  disabled={isPending || !isFormValid}
+                  variant="cta"
+                  size="xl"
+                  className="w-full h-full bg-[#1d1d1d] rounded-2xl text-white text-base hover:bg-[#1d1d1d]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isPending ? "Bokar..." : "Boka"}
+                </Button>
               </div>
             </form>
           </main>
