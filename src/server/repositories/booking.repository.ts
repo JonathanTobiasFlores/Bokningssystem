@@ -91,29 +91,11 @@ export class BookingRepository {
         roomId,
         date: new Date(date),
         status: 'confirmed',
-        OR: [
-          {
-            AND: [
-              { startTime: { lte: startTime } },
-              { endTime: { gt: startTime } }
-            ]
-          },
-          {
-            AND: [
-              { startTime: { lt: endTime } },
-              { endTime: { gte: endTime } }
-            ]
-          },
-          {
-            AND: [
-              { startTime: { gte: startTime } },
-              { endTime: { lte: endTime } }
-            ]
-          }
-        ]
+        startTime,
+        endTime
       }
     });
-
+  
     return count > 0;
   }
 

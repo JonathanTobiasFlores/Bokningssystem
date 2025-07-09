@@ -32,22 +32,37 @@ export async function bookSlotAction(
 
   try {
     const { name, slotId } = validatedFields.data;
-
-    // The slotId is a string: `${roomId}-${dateISOString}-${timeSlotId}`
-    const [roomIdStr, dateISO, timeSlotIdStr] = slotId.split("-");
-    const roomId = parseInt(roomIdStr, 10);
-    const timeSlotId = parseInt(timeSlotIdStr.split('Z')[0], 10);
+  
+    // Debug log to see the format
+    console.log("SlotId format:", slotId);
+  
+    // The slotId format is: roomId-dateISOString-timeSlotId
+    // Example: "1-2025-01-09T00:00:00.000Z-3"
+    
+    // Find the first hyphen (after roomId)
+    const firstHyphenIndex = slotId.indexOf('-');
+    const roomId = parseInt(slotId.substring(0, firstHyphenIndex), 10);
+    
+    // Find the last hyphen (before timeSlotId)
+    const lastHyphenIndex = slotId.lastIndexOf('-');
+    const timeSlotId = parseInt(slotId.substring(lastHyphenIndex + 1), 10);
+    
+    // Everything between first and last hyphen is the date
+    const dateISO = slotId.substring(firstHyphenIndex + 1, lastHyphenIndex);
     const date = new Date(dateISO);
-
-    if (isNaN(roomId) || isNaN(timeSlotId) || !date) {
-        throw new Error("Invalid slot ID format.");
+  
+    console.log("Parsed values:", { roomId, timeSlotId, dateISO, date });
+  
+    if (isNaN(roomId) || isNaN(timeSlotId) || !date || isNaN(date.getTime())) {
+      console.error("Parsing failed:", { roomId, timeSlotId, date, slotId });
+      throw new Error("Invalid slot ID format.");
     }
     
     const tempTimeSlotData = await bookingService.getTimeSlotById(timeSlotId);
     if (!tempTimeSlotData) {
-        throw new Error("Time slot not found.");
+      throw new Error("Time slot not found.");
     }
-
+  
     await bookingService.createBooking({
       bookerName: name,
       roomId,
@@ -56,9 +71,9 @@ export async function bookSlotAction(
       startTime: tempTimeSlotData.startTime,
       endTime: tempTimeSlotData.endTime,
     });
-
+  
     return { message: "Bokning bekräftad!" };
-
+  
   } catch (error) {
     if (error instanceof BookingConflictError) {
       return { message: error.message };
