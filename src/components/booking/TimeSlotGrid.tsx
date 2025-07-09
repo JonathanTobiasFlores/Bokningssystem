@@ -1,66 +1,96 @@
 "use client";
 
 import { useBookingStore } from "@/lib/store/booking";
-import { format, addDays, startOfDay } from "date-fns";
+import { format, addDays, startOfDay, formatISO } from "date-fns";
 import { sv } from "date-fns/locale";
-import { memo } from "react";
+import React, { memo } from "react";
 import { VirtualizedDayColumn } from "@/components/booking/VirtualizedDayColumn";
 import { config } from "@/lib/config";
 import type { TimeSlot } from "@/lib/store/booking";
+import { TimeSlotGridSkeleton } from "./TimeSlotSkeleton";
 
 interface TimeSlotGridProps {
   height: number;
 }
 
 const DateHeader = memo(({ date }: { date: Date }) => (
-  <div className="py-2 text-center font-medium text-base border-r border-[#BDBDBD] last:border-r-0">
-    {format(date, "d MMM", { locale: sv })}
+  <div className="text-center p-2 font-medium capitalize">
+    {format(date, "eee d", { locale: sv })}
   </div>
 ));
 DateHeader.displayName = "DateHeader";
 
-// Hard-coded sample data for a week
-const generateSampleTimeSlots = (startDate: Date): TimeSlot[] => {
-  const slots: TimeSlot[] = [];
-  const rooms = ["Margret", "Steve", "Ada", "Edmund", "Grace"];
-  for (let day = 0; day < 7; day++) {
-    const currentDate = addDays(startOfDay(startDate), day);
-    for (let hour = 8; hour < 17; hour++) {
-      rooms.forEach((roomName, roomIndex) => {
-        slots.push({
-          id: `${day}-${hour}-${roomIndex}`,
-          roomName,
-          capacity: (roomIndex + 1) * 2,
-          startTime: `${String(hour).padStart(2, '0')}:00`,
-          endTime: `${String(hour + 1).padStart(2, '0')}:00`,
-          date: currentDate,
-          available: Math.random() > 0.3, // 70% available
-        });
-      });
-    }
-  }
-  return slots;
-};
-
-
 export function TimeSlotGrid({ height }: TimeSlotGridProps) {
   const { selectedDate, selectedRooms } = useBookingStore();
-  
-  const dates = Array.from({ length: config.booking.navigationStep }, (_, i) => addDays(selectedDate, i));
-  const allSlots = generateSampleTimeSlots(selectedDate);
+  const [allSlots, setAllSlots] = React.useState<TimeSlot[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchSlots = async () => {
+      if (selectedRooms.length === 0) {
+        setAllSlots([]);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+
+      const startDate = selectedDate;
+      const endDate = addDays(startDate, config.booking.navigationStep - 1);
+      const roomIds = selectedRooms.map(r => r.id).join(',');
+
+      const query = new URLSearchParams({
+        startDate: formatISO(startDate),
+        endDate: formatISO(endDate),
+        roomIds,
+      }).toString();
+
+      try {
+        const response = await fetch(`/api/timeslots?${query}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch time slots");
+        }
+        const data = await response.json();
+        // The API returns dates as strings, so we need to convert them back to Date objects
+        const slotsWithDates = data.data.map((slot: any) => ({
+          ...slot,
+          date: new Date(slot.date),
+        }));
+        setAllSlots(slotsWithDates);
+      } catch (error) {
+        console.error(error);
+        setAllSlots([]); // Clear slots on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSlots();
+  }, [selectedDate, selectedRooms]);
+
+  const dates = Array.from(
+    { length: config.booking.navigationStep },
+    (_, i) => addDays(selectedDate, i)
+  );
 
   if (selectedRooms.length === 0) {
     return (
       <div className="flex items-center justify-center h-full border border-[#BDBDBD] rounded-lg">
-        <p className="text-gray-500 text-center">Välj ett eller flera mötesrum för att se tillgängliga tider.</p>
+        <p className="text-gray-500 text-center">
+          Välj ett eller flera mötesrum för att se tillgängliga tider.
+        </p>
       </div>
     );
   }
 
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: `repeat(${dates.length}, minmax(0, 1fr))`,
+  if (isLoading) {
+    return <TimeSlotGridSkeleton selectedDate={selectedDate} />;
   }
+  
+  const gridStyle = {
+    display: "grid",
+    gridTemplateColumns: `repeat(${dates.length}, minmax(0, 1fr))`,
+  };
 
   return (
     <div className="border border-[#BDBDBD] rounded-lg">
@@ -70,23 +100,23 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
           <DateHeader key={index} date={date} />
         ))}
       </div>
-      
+
       {/* Time slots with virtualized scrolling */}
-      <div style={{...gridStyle, height: `${height - 40}px` }}> {/* Subtract header height */}
+      <div style={{ ...gridStyle, height: `${height - 40}px` }}>
         {dates.map((date) => {
-            const daySlots = allSlots.filter(slot => 
-                slot.date.getTime() === date.getTime() &&
-                selectedRooms.some(room => room.name === slot.roomName)
-            );
-            return (
-                <VirtualizedDayColumn
-                    key={date.toISOString()}
-                    daySlots={daySlots}
-                    height={height - 40} // Pass down remaining height
-                />
-            )
+          const daySlots = allSlots.filter(
+            (slot) =>
+              startOfDay(slot.date).getTime() === startOfDay(date).getTime()
+          );
+          return (
+            <VirtualizedDayColumn
+              key={date.toISOString()}
+              daySlots={daySlots}
+              height={height - 40} // Pass down remaining height
+            />
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

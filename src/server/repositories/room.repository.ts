@@ -1,59 +1,78 @@
-import { PrismaClient } from '@prisma/client';
-import { Room, RoomWithBookings } from '@/lib/types/room.types';
+import { Prisma, PrismaClient, Room as PrismaRoom } from "@prisma/client";
+import { Room, RoomWithBookings } from "@/lib/types/room.types";
+
+type PrismaRoomWithBookings = Prisma.RoomGetPayload<{
+  include: { bookings: { select: { startTime: true; endTime: true } } };
+}>;
 
 export class RoomRepository {
   constructor(private prisma: PrismaClient) {}
 
-  async findAll(): Promise<Room[]> {
-    try {
-      const rooms = await this.prisma.room.findMany({
-        orderBy: { capacity: 'asc' }
-      });
-      console.log('DEBUG: rooms from Prisma:', rooms);
-      return rooms.map(this.mapToRoom);
-    } catch (error) {
-      console.error('DEBUG: Error in findAll:', error);
-      throw error;
+  private mapToRoom(room: any): Room {
+    if (!room || typeof room.id !== 'number' || typeof room.name !== 'string' || typeof room.capacity !== 'number') {
+        throw new Error("Invalid room object received for mapping.");
     }
+
+    return {
+      id: room.id,
+      name: room.name,
+      capacity: room.capacity,
+      createdAt: room.createdAt ?? new Date(),
+      updatedAt: room.updatedAt ?? new Date(),
+      deletedAt: room.deletedAt ?? null,
+    };
+  }
+
+  private mapToRoomWithBookings(
+    room: PrismaRoomWithBookings
+  ): RoomWithBookings {
+    return {
+      ...this.mapToRoom(room),
+      bookedSlots: room.bookings.map((b) => `${b.startTime}-${b.endTime}`),
+    };
+  }
+
+  async findAll(): Promise<Room[]> {
+    const rooms = await this.prisma.room.findMany({ where: { deletedAt: null } });
+    return rooms.map(this.mapToRoom);
   }
 
   async findById(id: number): Promise<Room | null> {
     const room = await this.prisma.room.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
     });
     return room ? this.mapToRoom(room) : null;
   }
 
-  async findWithAvailability(date: string): Promise<(Room & { bookedSlots: string[] })[]> {
+  async findByIds(ids: number[]): Promise<Room[]> {
     const rooms = await this.prisma.room.findMany({
-      include: {
-        bookings: {
-          where: {
-            date: new Date(date),
-            status: 'confirmed'
-          },
-          select: {
-            startTime: true,
-            endTime: true
-          }
-        }
+      where: {
+        ...(ids.length > 0 && { id: { in: ids } }),
+        deletedAt: null,
       },
-      orderBy: { capacity: 'asc' }
+      orderBy: { name: "asc" },
     });
-
-    return rooms.map((room: RoomWithBookings) => ({
-      ...this.mapToRoom(room),
-      bookedSlots: room.bookings.map((b: { startTime: string; endTime: string }) => `${b.startTime}-${b.endTime}`)
-    }));
+    return rooms.map(this.mapToRoom);
   }
 
-  private mapToRoom(data: Pick<RoomWithBookings, 'id' | 'name' | 'capacity' | 'createdAt' | 'updatedAt'>): Room {
-    return {
-      id: data.id,
-      name: data.name,
-      capacity: data.capacity,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt
-    };
+  async create(
+    data: Omit<Room, "id" | "createdAt" | "updatedAt" | "deletedAt">
+  ): Promise<Room> {
+    const room = await this.prisma.room.create({ data });
+    return this.mapToRoom(room);
+  }
+
+  async getRoomsWithAvailability(date: string): Promise<RoomWithBookings[]> {
+    const targetDate = new Date(date);
+    const roomsWithBookings = await this.prisma.room.findMany({
+      where: { deletedAt: null },
+      include: {
+        bookings: {
+          where: { date: { equals: targetDate } },
+          select: { startTime: true, endTime: true },
+        },
+      },
+    });
+    return roomsWithBookings.map(this.mapToRoomWithBookings);
   }
 }

@@ -1,5 +1,6 @@
 import { BookingRepository } from '@/server/repositories/booking.repository';
 import { RoomRepository } from '@/server/repositories/room.repository';
+import { TimeSlotRepository } from '../repositories/timeSlot.repository';
 import { CreateBookingDto } from '@/server/validations/booking.schema';
 import { 
   BookingConflictError, 
@@ -10,11 +11,16 @@ import { Booking } from '@/lib/types/booking.types';
 export class BookingService {
   constructor(
     private bookingRepo: BookingRepository,
-    private roomRepo: RoomRepository
+    private roomRepo: RoomRepository,
+    private timeSlotRepo: TimeSlotRepository
   ) {}
 
   async getBookings(filters: { date?: string | null; roomId?: number | null }) {
     return this.bookingRepo.findMany(filters);
+  }
+
+  async getTimeSlotById(id: number) {
+    return this.timeSlotRepo.findById(id);
   }
 
   async createBooking(data: CreateBookingDto): Promise<Booking> {

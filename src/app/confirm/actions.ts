@@ -1,6 +1,8 @@
 "use server";
 
 import { z } from "zod";
+import { bookingService } from "@/server/services";
+import { BookingConflictError } from "@/lib/errors/booking.errors";
 
 export interface FormState {
   message: string;
@@ -15,7 +17,6 @@ export async function bookSlotAction(
   state: FormState,
   formData: FormData
 ): Promise<FormState> {
-  
   const rawData = {
     name: formData.get("name"),
     slotId: formData.get("slotId"),
@@ -24,15 +25,45 @@ export async function bookSlotAction(
   const validatedFields = BookSlotSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
-    // Return the validation errors
     const errors = validatedFields.error.flatten().fieldErrors;
     const errorMessages = Object.values(errors).flat().join(" ");
     return { message: `Validation failed: ${errorMessages}` };
   }
 
-  console.log("Booking successful!");
-  console.log("Name:", validatedFields.data.name);
-  console.log("Slot ID:", validatedFields.data.slotId);
+  try {
+    const { name, slotId } = validatedFields.data;
 
-  return { message: "Bokning bekräftad!" };
+    // The slotId is a string: `${roomId}-${dateISOString}-${timeSlotId}`
+    const [roomIdStr, dateISO, timeSlotIdStr] = slotId.split("-");
+    const roomId = parseInt(roomIdStr, 10);
+    const timeSlotId = parseInt(timeSlotIdStr.split('Z')[0], 10);
+    const date = new Date(dateISO);
+
+    if (isNaN(roomId) || isNaN(timeSlotId) || !date) {
+        throw new Error("Invalid slot ID format.");
+    }
+    
+    const tempTimeSlotData = await bookingService.getTimeSlotById(timeSlotId);
+    if (!tempTimeSlotData) {
+        throw new Error("Time slot not found.");
+    }
+
+    await bookingService.createBooking({
+      bookerName: name,
+      roomId,
+      date: date.toISOString().split("T")[0], // YYYY-MM-DD
+      timeSlotId,
+      startTime: tempTimeSlotData.startTime,
+      endTime: tempTimeSlotData.endTime,
+    });
+
+    return { message: "Bokning bekräftad!" };
+
+  } catch (error) {
+    if (error instanceof BookingConflictError) {
+      return { message: error.message };
+    }
+    console.error("Booking failed:", error);
+    return { message: "Ett fel uppstod vid bokningen. Försök igen." };
+  }
 } 

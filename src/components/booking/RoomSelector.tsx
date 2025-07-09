@@ -12,17 +12,28 @@ import { ChevronDown } from "lucide-react";
 import { useBookingStore } from "@/lib/store/booking";
 import type { Room } from "@/lib/types/room.types";
 
-const allRooms: Room[] = [
-  { id: 1, name: "Margret", capacity: 4, createdAt: new Date(), updatedAt: new Date() },
-  { id: 2, name: "Steve", capacity: 6, createdAt: new Date(), updatedAt: new Date() },
-  { id: 3, name: "Ada", capacity: 10, createdAt: new Date(), updatedAt: new Date() },
-  { id: 4, name: "Edmund", capacity: 10, createdAt: new Date(), updatedAt: new Date() },
-  { id: 5, name: "Grace", capacity: 20, createdAt: new Date(), updatedAt: new Date() },
-];
-
 export function RoomSelector() {
   const [isOpen, setIsOpen] = React.useState(false);
+  const [allRooms, setAllRooms] = React.useState<Room[]>([]);
   const { selectedRooms, setSelectedRooms } = useBookingStore();
+
+  React.useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch("/api/rooms");
+        if (!response.ok) {
+          throw new Error("Failed to fetch rooms");
+        }
+        const data = await response.json();
+        setAllRooms(data.data);
+      } catch (error) {
+        console.error(error);
+        // Handle error state in UI if necessary
+      }
+    };
+
+    fetchRooms();
+  }, []);
 
   const handleRoomSelect = (room: Room) => {
     const isSelected = selectedRooms.some((r) => r.id === room.id);
