@@ -52,6 +52,17 @@ export function RoomSelector() {
     setSelectedRooms([]);
   }
 
+  const triggerText = React.useMemo(() => {
+    const count = selectedRooms.length;
+    if (count === 0) {
+      return "Mötesrum";
+    }
+    if (count === 1) {
+      return "1 valt rum";
+    }
+    return `${count} valda rum`;
+  }, [selectedRooms]);
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
@@ -59,7 +70,7 @@ export function RoomSelector() {
           variant="ghost"
           className="font-helvetica w-[164px] h-[45px] justify-between p-4 rounded-lg border border-[#BDBDBD] text-[#212121] text-[18px] font-normal hover:text-[#212121]"
         >
-          Mötesrum{" "}
+          {triggerText}{" "}
           <ChevronDown
             className={`h-4 w-4 transition-transform duration-200 ${
               isOpen ? "rotate-180" : ""
