@@ -38,6 +38,13 @@ export class RoomRepository {
     return rooms.map(this.mapToRoom);
   }
 
+  async findAllWithDeleted(): Promise<Room[]> {
+    const rooms = await this.prisma.room.findMany({
+      orderBy: { name: "asc" },
+    });
+    return rooms.map(this.mapToRoom);
+  }
+
   async findById(id: number): Promise<Room | null> {
     const room = await this.prisma.room.findUnique({
       where: { id, deletedAt: null },
@@ -60,6 +67,30 @@ export class RoomRepository {
     data: Omit<Room, "id" | "createdAt" | "updatedAt" | "deletedAt">
   ): Promise<Room> {
     const room = await this.prisma.room.create({ data });
+    return this.mapToRoom(room);
+  }
+
+  async update(
+    id: number,
+    data: { name?: string; capacity?: number }
+  ): Promise<Room> {
+    const room = await this.prisma.room.update({ where: { id }, data });
+    return this.mapToRoom(room);
+  }
+
+  async softDelete(id: number): Promise<Room | null> {
+    const room = await this.prisma.room.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+    return this.mapToRoom(room);
+  }
+
+  async restore(id: number): Promise<Room> {
+    const room = await this.prisma.room.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
     return this.mapToRoom(room);
   }
 
