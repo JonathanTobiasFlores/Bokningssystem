@@ -25,7 +25,7 @@ const TimeSlotButtonComponent = ({ slot }: TimeSlotButtonProps) => {
       onClick={handleClick}
       disabled={!slot.available}
       className={cn(
-        "flex flex-col justify-center",
+        "flex flex-col justify-center text-left",
         "w-[99px] h-12 m-2 p-2",
         "border border-[#00695C] rounded-[4.41px]",
         "font-['Roboto',_sans-serif] font-normal text-sm leading-[16.8px]",
@@ -41,10 +41,10 @@ const TimeSlotButtonComponent = ({ slot }: TimeSlotButtonProps) => {
         !slot.available && "opacity-50 cursor-not-allowed"
       )}
     >
-      <span className="leading-[120%]">
+      <span className="leading-[120%] truncate">
         {slot.roomName} ({slot.capacity})
       </span>
-      <span className="leading-[120%]">
+      <span className="leading-[120%] truncate">
         {slot.startTime}-{slot.endTime}
       </span>
     </button>

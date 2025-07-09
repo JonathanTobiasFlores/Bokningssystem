@@ -15,7 +15,7 @@ interface TimeSlotGridProps {
 }
 
 const DateHeader = memo(({ date }: { date: Date }) => (
-  <div className="text-center p-2 font-medium capitalize">
+  <div className="text-center p-2 font-medium capitalize border-r border-[#BDBDBD] last:border-r-0">
     {format(date, "eee d", { locale: sv })}
   </div>
 ));

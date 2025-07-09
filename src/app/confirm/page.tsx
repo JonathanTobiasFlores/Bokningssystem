@@ -107,7 +107,10 @@ export default function ConfirmPage() {
         </div>
       </div>
       <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="w-60 h-[137px] bg-[#ececec] rounded-2xl border-none p-0">
+        <DialogContent
+          showCloseButton={false}
+          className="w-60 h-[137px] bg-[#ececec] rounded-2xl border-none p-0"
+        >
           <div className="flex flex-col items-center justify-center h-full">
             <DialogHeader>
               <DialogTitle className="sr-only">Bekräftelse</DialogTitle>
