@@ -2,6 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import { Booking, BookingWithRoom, CreateBookingData } from '@/lib/types/booking.types';
 import { toUTCDate, toDBDateString } from '@/lib/utils/dateHelpers';
 
+type PrismaTransactionalClient = Omit<
+  PrismaClient,
+  '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+>;
+
 export class BookingRepository {
   constructor(private prisma: PrismaClient) {}
 
@@ -39,7 +44,11 @@ export class BookingRepository {
     return booking ? this.mapToBooking(booking) : null;
   }
 
-  async create(data: CreateBookingData): Promise<Booking> {
+  async create(
+    data: CreateBookingData,
+    tx?: PrismaTransactionalClient
+  ): Promise<Booking> {
+    const prismaClient = tx || this.prisma;
     const {
       roomId,
       bookerName,
@@ -55,7 +64,7 @@ export class BookingRepository {
       throw new Error('Invalid or missing timeSlotId');
     }
 
-    const booking = await this.prisma.booking.create({
+    const booking = await prismaClient.booking.create({
       data: {
         roomId,
         userName: bookerName,
@@ -85,9 +94,11 @@ export class BookingRepository {
     roomId: number, 
     date: string, 
     startTime: string, 
-    endTime: string
+    endTime: string,
+    tx?: PrismaTransactionalClient
   ): Promise<boolean> {
-    const count = await this.prisma.booking.count({
+    const prismaClient = tx || this.prisma;
+    const count = await prismaClient.booking.count({
       where: {
         roomId,
         date: toUTCDate(date),

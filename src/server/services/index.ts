@@ -15,6 +15,6 @@ const roomRepository = new RoomRepository(prisma);
 const timeSlotRepository = new TimeSlotRepository(prisma);
 
 // Initialize services with dependencies
-export const bookingService = new BookingService(bookingRepository, roomRepository, timeSlotRepository);
+export const bookingService = new BookingService(prisma, bookingRepository, roomRepository, timeSlotRepository);
 export const roomService = new RoomService(roomRepository);
 export const timeSlotService = new TimeSlotService(timeSlotRepository, roomRepository);

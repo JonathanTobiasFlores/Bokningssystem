@@ -12,9 +12,11 @@ import { Booking } from '@/lib/types/booking.types';
 import { differenceInDays, startOfDay, isToday, parse } from 'date-fns';
 import { toUTCDate, getZonedTime } from '@/lib/utils/dateHelpers';
 import { config } from '@/lib/config';
+import { PrismaClient } from '@prisma/client';
 
 export class BookingService {
   constructor(
+    private prisma: PrismaClient,
     private bookingRepo: BookingRepository,
     private roomRepo: RoomRepository,
     private timeSlotRepo: TimeSlotRepository
@@ -35,17 +37,14 @@ export class BookingService {
       throw new RoomNotFoundError(data.roomId);
     }
 
-    // 2. Check for conflicts
-
-    // Business rule: booking cannot be more than maxAdvanceDays ahead
+    // 2. Business rule validations
     const maxDays = config.booking.maxAdvanceDays;
     const bookingDate = startOfDay(toUTCDate(data.date));
     const today = startOfDay(toUTCDate(new Date()));
     if (differenceInDays(bookingDate, today) > maxDays) {
       throw new BookingDateOutOfRangeError(maxDays);
     }
-    
-    // Business rule: prevent booking a time slot that has already passed today
+
     if (isToday(bookingDate)) {
       const now = getZonedTime(new Date());
       const slotStartTime = parse(data.startTime, 'HH:mm', new Date());
@@ -62,28 +61,34 @@ export class BookingService {
       }
     }
 
-    const hasConflict = await this.bookingRepo.hasTimeConflict(
-      data.roomId,
-      data.date,
-      data.startTime,
-      data.endTime
-    );
-
-    if (hasConflict) {
-      throw new BookingConflictError(
-        `Time slot ${data.startTime}-${data.endTime} is already booked`
+    // 3. Transactional booking creation
+    return this.prisma.$transaction(async (tx) => {
+      const hasConflict = await this.bookingRepo.hasTimeConflict(
+        data.roomId,
+        data.date,
+        data.startTime,
+        data.endTime,
+        tx
       );
-    }
 
-    // 3. Create booking
-    return this.bookingRepo.create({
-      roomId: data.roomId,
-      bookerName: data.bookerName,
-      date: data.date,
-      startTime: data.startTime,
-      endTime: data.endTime,
-      status: 'confirmed',
-      timeSlotId: data.timeSlotId
+      if (hasConflict) {
+        throw new BookingConflictError(
+          `Time slot ${data.startTime}-${data.endTime} is already booked`
+        );
+      }
+
+      return this.bookingRepo.create(
+        {
+          roomId: data.roomId,
+          bookerName: data.bookerName,
+          date: data.date,
+          startTime: data.startTime,
+          endTime: data.endTime,
+          status: 'confirmed',
+          timeSlotId: data.timeSlotId,
+        },
+        tx
+      );
     });
   }
 
