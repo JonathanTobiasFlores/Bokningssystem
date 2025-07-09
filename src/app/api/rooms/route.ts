@@ -1,31 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { roomService } from '@/server/services';
+import { handleError } from '@/lib/utils/api-helpers';
 
-export async function GET(request: NextRequest) {
+export const dynamic = 'force-dynamic';
+
+export async function GET() {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const date = searchParams.get('date');
-    
-    if (date) {
-      // Get rooms with availability for specific date
-      const rooms = await roomService.getRoomsWithAvailability(date);
-      return NextResponse.json({
-        success: true,
-        data: rooms
-      });
-    }
-    
-    // Get all rooms
     const rooms = await roomService.getAllRooms();
-    return NextResponse.json({
-      success: true,
-      data: rooms
-    });
+    return NextResponse.json({ success: true, data: rooms });
   } catch (error) {
-    console.error('Error fetching rooms:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch rooms' },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 }

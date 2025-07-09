@@ -10,7 +10,6 @@ interface GetAvailableTimeSlotsParams {
   roomIds: number[];
 }
 
-// This is the structure the frontend expects
 export interface TimeSlot {
   id: string;
   roomName: string;

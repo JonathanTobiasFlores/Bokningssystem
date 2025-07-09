@@ -67,7 +67,7 @@ export const VirtualizedDayColumn = memo(({
   return (
     <div className="border-r border-[#BDBDBD] last:border-r-0">
       <List
-        key={key} // Force re-render when data changes
+        key={key}
         ref={listRef}
         height={height}
         itemCount={daySlots.length}

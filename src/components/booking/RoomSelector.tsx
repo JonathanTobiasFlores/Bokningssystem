@@ -28,7 +28,6 @@ export function RoomSelector() {
         setAllRooms(data.data);
       } catch (error) {
         console.error(error);
-        // Handle error state in UI if necessary
       }
     };
 

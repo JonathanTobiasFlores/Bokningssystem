@@ -18,13 +18,11 @@ export interface BookingState {
   selectedRooms: Room[]
   selectedDate: Date
   selectedSlot: string | null
-  userName: string
   
   // Actions
   setSelectedRooms: (rooms: Room[]) => void
   setSelectedDate: (date: Date) => void
   setSelectedSlot: (slotId: string | null) => void
-  setUserName: (name: string) => void
   navigateDateRange: (direction: 'prev' | 'next') => void
   resetBookingState: () => void
 }
@@ -34,13 +32,11 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   selectedRooms: [],
   selectedDate: startOfDay(new Date()),
   selectedSlot: null,
-  userName: '',
   
   // Actions
   setSelectedRooms: (rooms) => {
     set({ 
       selectedRooms: rooms,
-      // FIXED: Clear selected slot when rooms change since slot IDs include room ID
       selectedSlot: null 
     })
   },
@@ -48,17 +44,12 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   setSelectedDate: (date) => {
     set({ 
       selectedDate: startOfDay(date),
-      // Clear selected slot when date changes since slot IDs include date
       selectedSlot: null 
     })
   },
   
   setSelectedSlot: (slotId) => {
     set({ selectedSlot: slotId })
-  },
-  
-  setUserName: (name) => {
-    set({ userName: name })
   },
   
   navigateDateRange: (direction) => {
@@ -82,7 +73,6 @@ export const useBookingStore = create<BookingState>((set, get) => ({
       selectedRooms: [],
       selectedDate: startOfDay(new Date()),
       selectedSlot: null,
-      userName: '',
     })
   },
 })) 

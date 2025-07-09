@@ -60,7 +60,7 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
         setAllSlots(slotsWithDates);
       } catch (error) {
         console.error(error);
-        setAllSlots([]); // Clear slots on error
+        setAllSlots([]);
       } finally {
         setIsLoading(false);
       }
@@ -134,7 +134,7 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
             <VirtualizedDayColumn
               key={date.toISOString()}
               daySlots={daySlots}
-              height={height - 40} // Pass down remaining height
+              height={height - 40}
             />
           );
         })}

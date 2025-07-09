@@ -4,33 +4,39 @@ import { startOfDay, endOfDay, differenceInDays } from "date-fns";
 import { toUTCDate } from "@/lib/utils/dateHelpers";
 import { isValid } from "date-fns";
 import { config } from "@/lib/config";
+import { z } from 'zod';
+import { handleError } from '@/lib/utils/api-helpers';
+
+// Define the schema for query parameters
+const timeSlotsQuerySchema = z.object({
+  startDate: z.string(),
+  endDate: z.string(),
+  roomIds: z.string().optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const startDateParam = searchParams.get("startDate");
-    const endDateParam = searchParams.get("endDate");
-    const roomIdsParam = searchParams.get("roomIds");
+    // Validate query parameters
+    const query = Object.fromEntries(request.nextUrl.searchParams.entries());
+    const validation = timeSlotsQuerySchema.safeParse(query);
 
-    if (!startDateParam || !endDateParam) {
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: "Missing required date parameters" },
+        { success: false, error: 'Invalid query parameters', details: validation.error.format() },
         { status: 400 }
       );
     }
-    
-    const startDateRaw = toUTCDate(startDateParam);
-    const endDateRaw = toUTCDate(endDateParam);
+    const { startDate: startDateString, endDate: endDateString, roomIds } = validation.data;
 
-    if (!isValid(startDateRaw) || !isValid(endDateRaw)) {
+    const startDate = startOfDay(toUTCDate(startDateString));
+    const endDate = endOfDay(toUTCDate(endDateString));
+
+    if (!isValid(startDate) || !isValid(endDate)) {
       return NextResponse.json(
         { success: false, error: "Invalid date format" },
         { status: 400 }
       );
     }
-
-    const startDate = startOfDay(startDateRaw);
-    const endDate = endOfDay(endDateRaw);
 
     // business rule: cannot request beyond maxAdvanceDays
     if (differenceInDays(endDate, new Date()) > config.booking.maxAdvanceDays) {
@@ -40,24 +46,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const roomIds = roomIdsParam ? roomIdsParam.split(',').map(Number) : [];
+    const roomIdsArray = roomIds ? roomIds.split(',').map(Number) : [];
 
     const timeSlots = await timeSlotService.getAvailableTimeSlots({
-        startDate,
-        endDate,
-        roomIds,
+      startDate,
+      endDate,
+      roomIds: roomIdsArray,
     });
 
     return NextResponse.json({
       success: true,
       data: timeSlots,
     });
-
   } catch (error) {
-    console.error("Error fetching time slots:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch time slots" },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 } 
