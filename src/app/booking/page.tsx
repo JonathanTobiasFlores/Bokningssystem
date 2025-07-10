@@ -4,7 +4,7 @@ import { memo } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { RoomSelector } from "@/components/booking/RoomSelector";
-import { TimeSlotGrid } from "@/components/booking/TimeSlotGrid";
+import { TimeSlotGrid } from "@/components/booking/time-slot-grid/TimeSlotGrid";
 import { DateNavigator } from "@/components/booking/DateNavigator";
 import { useBookingStore } from "@/lib/store/booking";
 import { cn } from "@/lib/utils";

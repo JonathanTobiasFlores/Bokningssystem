@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useActionState } from "react";
 import { redirect, useRouter } from "next/navigation";
 import { useBookingStore } from "@/lib/store/booking";
 import { bookSlotAction, type FormState } from "./actions";
@@ -26,20 +26,20 @@ export default function ConfirmPage() {
     message: "",
   };
 
-  const [state, formAction, isPending] = React.useActionState(
+  const [state, formAction, isPending] = useActionState(
     bookSlotAction,
     initialState
   );
 
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedSlot) {
       redirect("/");
     }
   }, [selectedSlot]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (state.message === "Bokning bekräftad!") {
       setIsDialogOpen(true);
     }

@@ -11,33 +11,51 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { useBookingStore } from "@/lib/store/booking";
 import type { Room } from "@/lib/types/room.types";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 
 export function RoomSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { selectedRooms, setSelectedRooms } = useBookingStore();
+  const fetchInitiated = useRef(false);
 
   useEffect(() => {
-    const fetchRooms = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch("/api/rooms");
-        if (!response.ok) {
-          throw new Error("Failed to fetch rooms");
-        }
-        const data = await response.json();
-        setAllRooms(data.data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    // Only fetch if the popover is open and the fetch hasn't been initiated yet.
+    if (isOpen && !fetchInitiated.current) {
+      const abortController = new AbortController();
+      const signal = abortController.signal;
 
-    if (isOpen) {
+      const fetchRooms = async () => {
+        setIsLoading(true);
+        fetchInitiated.current = true; // Mark that we've started the fetch
+
+        try {
+          const response = await fetch("/api/rooms", { signal });
+          if (!response.ok) {
+            throw new Error("Failed to fetch rooms");
+          }
+          const data = await response.json();
+          if (!signal.aborted) {
+            setAllRooms(data.data);
+          }
+        } catch (error) {
+          if (error instanceof Error && error.name !== 'AbortError') {
+            console.error(error);
+          }
+        } finally {
+          if (!signal.aborted) {
+            setIsLoading(false);
+          }
+        }
+      };
+
       fetchRooms();
+
+      return () => {
+        // When the component unmounts or the effect re-runs, abort the fetch.
+        abortController.abort();
+      };
     }
   }, [isOpen]);
 
