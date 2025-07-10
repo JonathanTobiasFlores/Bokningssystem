@@ -6,7 +6,7 @@ export async function GET(
   context: { params: { id: string } }
 ) {
   try {
-    const { id } = await context.params;
+    const { id } = context.params;
     const numericId = Number(id);
     if (isNaN(numericId)) {
       return NextResponse.json(

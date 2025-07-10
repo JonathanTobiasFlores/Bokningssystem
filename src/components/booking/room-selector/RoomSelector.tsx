@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useMemo, useCallback, useEffect } from "react";
+import { memo, useState, useMemo, useCallback} from "react";
 import {
   Popover,
   PopoverContent,

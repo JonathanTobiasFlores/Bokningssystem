@@ -5,6 +5,8 @@ import { config } from '@/lib/config';
 import type { TimeSlot } from '@/lib/store/booking';
 import type { Room } from '@/lib/types/room.types';
 
+type ApiTimeSlot = Omit<TimeSlot, 'date'> & { date: string };
+
 export function useTimeSlots(selectedDate: Date, selectedRooms: Room[]) {
   const [allSlots, setAllSlots] = useState<TimeSlot[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -50,7 +52,7 @@ export function useTimeSlots(selectedDate: Date, selectedRooms: Room[]) {
         
         // Only update if this request wasn't aborted
         if (!abortController.signal.aborted) {
-          const slotsWithDates = data.data.map((slot: any) => ({
+          const slotsWithDates = data.data.map((slot: ApiTimeSlot) => ({
             ...slot,
             date: fromUTCDate(slot.date),
           }));
@@ -58,8 +60,8 @@ export function useTimeSlots(selectedDate: Date, selectedRooms: Room[]) {
           setAllSlots(slotsWithDates);
           setIsInitialLoading(false);
         }
-      } catch (error: any) {
-        if (error.name !== 'AbortError') {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name !== 'AbortError') {
           console.error(error);
           if (!abortController.signal.aborted) {
             setAllSlots([]);
