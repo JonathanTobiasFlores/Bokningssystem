@@ -11,14 +11,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { useBookingStore } from "@/lib/store/booking";
 import type { Room } from "@/lib/types/room.types";
+import { useEffect, useState, useMemo } from "react";
 
 export function RoomSelector() {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [allRooms, setAllRooms] = React.useState<Room[]>([]);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [allRooms, setAllRooms] = useState<Room[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { selectedRooms, setSelectedRooms } = useBookingStore();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchRooms = async () => {
       setIsLoading(true);
       try {
@@ -57,7 +58,7 @@ export function RoomSelector() {
     setSelectedRooms([]);
   }
 
-  const triggerText = React.useMemo(() => {
+  const triggerText = useMemo(() => {
     const count = selectedRooms.length;
     if (count === 0) {
       return "Mötesrum";

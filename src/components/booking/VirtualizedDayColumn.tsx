@@ -1,18 +1,9 @@
 "use client"
 
-import { memo, useRef, useMemo } from 'react'
+import { memo, useRef } from 'react'
 import { FixedSizeList as List } from 'react-window'
 import { TimeSlotButton } from "./TimeSlotButton"
-
-interface TimeSlot {
-  id: string
-  roomName: string
-  capacity: number
-  startTime: string
-  endTime: string
-  date: Date
-  available: boolean
-}
+import type { TimeSlot } from "@/lib/store/booking";
 
 interface VirtualizedDayColumnProps {
   daySlots: TimeSlot[]
@@ -27,9 +18,9 @@ const ItemRenderer = memo(({
 }: { 
   index: number
   style: React.CSSProperties
-  data: TimeSlot[]
+  data: { daySlots: TimeSlot[] }
 }) => {
-  const slot = data[index]
+  const slot = data.daySlots[index]
   if (!slot) return null
   
   return (
@@ -40,17 +31,29 @@ const ItemRenderer = memo(({
 })
 ItemRenderer.displayName = 'ItemRenderer'
 
-export const VirtualizedDayColumn = memo(({ 
+const areEqual = (prevProps: VirtualizedDayColumnProps, nextProps: VirtualizedDayColumnProps) => {
+    if (prevProps.height !== nextProps.height) {
+        return false;
+    }
+    if (prevProps.daySlots.length !== nextProps.daySlots.length) {
+        return false;
+    }
+    for (let i = 0; i < prevProps.daySlots.length; i++) {
+        if (prevProps.daySlots[i].id !== nextProps.daySlots[i].id || 
+            prevProps.daySlots[i].available !== nextProps.daySlots[i].available) {
+            return false;
+        }
+    }
+    return true;
+}
+
+const VirtualizedDayColumnComponent = ({ 
   daySlots,
   height,
 }: VirtualizedDayColumnProps) => {
   const listRef = useRef<List>(null)
   
-  // Calculate item size based on TimeSlotButton height + spacing
-  const ITEM_SIZE = 58 // 48px button height + 10px spacing
-  
-  // Force re-render when data changes
-  const key = useMemo(() => daySlots.map(slot => `${slot.id}-${slot.available}`).join(','), [daySlots])
+  const ITEM_SIZE = 58; // 48px button height + 10px spacing
   
   if (daySlots.length === 0) {
     return (
@@ -67,12 +70,12 @@ export const VirtualizedDayColumn = memo(({
   return (
     <div className="border-r border-[#BDBDBD] last:border-r-0">
       <List
-        key={key}
         ref={listRef}
         height={height}
         itemCount={daySlots.length}
         itemSize={ITEM_SIZE}
-        itemData={daySlots}
+        itemData={{ daySlots }}
+        itemKey={(index, data) => data.daySlots[index].id}
         width="100%"
         className="scrollbar-hide"
       >
@@ -80,5 +83,7 @@ export const VirtualizedDayColumn = memo(({
       </List>
     </div>
   )
-})
-VirtualizedDayColumn.displayName = 'VirtualizedDayColumn' 
+}
+
+export const VirtualizedDayColumn = memo(VirtualizedDayColumnComponent, areEqual);
+VirtualizedDayColumn.displayName = "VirtualizedDayColumn" 
