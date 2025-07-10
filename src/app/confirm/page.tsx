@@ -21,6 +21,7 @@ export default function ConfirmPage() {
   const selectedSlot = useBookingStore((state) => state.selectedSlot);
   const resetBookingState = useBookingStore((state) => state.resetBookingState);
   const [name, setName] = useState("");
+  const [isClient, setIsClient] = useState(false);
 
   const initialState: FormState = {
     message: "",
@@ -34,10 +35,14 @@ export default function ConfirmPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    if (!selectedSlot) {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && !selectedSlot) {
       redirect("/");
     }
-  }, [selectedSlot]);
+  }, [selectedSlot, isClient]);
 
   useEffect(() => {
     if (state.message === "Bokning bekräftad!") {
@@ -51,7 +56,7 @@ export default function ConfirmPage() {
     router.push("/");
   };
 
-  if (!selectedSlot) {
+  if (!isClient || !selectedSlot) {
     return null;
   }
 
