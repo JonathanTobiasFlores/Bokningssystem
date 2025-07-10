@@ -8,6 +8,7 @@ import type { TimeSlot } from "@/lib/store/booking";
 interface VirtualizedDayColumnProps {
   daySlots: TimeSlot[]
   height: number;
+  columnIndex?: number;
 }
 
 // Item renderer for react-window
@@ -18,13 +19,19 @@ const ItemRenderer = memo(({
 }: { 
   index: number
   style: React.CSSProperties
-  data: { daySlots: TimeSlot[] }
+  data: { daySlots: TimeSlot[], columnIndex: number }
 }) => {
   const slot = data.daySlots[index]
   if (!slot) return null
   
   return (
-    <div style={style} className="flex justify-center">
+    <div 
+      style={{
+        ...style,
+        animation: `fadeIn 400ms ease-in-out`
+      }} 
+      className="flex justify-center"
+    >
       <TimeSlotButton slot={slot} />
     </div>
   )
@@ -50,6 +57,7 @@ const areEqual = (prevProps: VirtualizedDayColumnProps, nextProps: VirtualizedDa
 const VirtualizedDayColumnComponent = ({ 
   daySlots,
   height,
+  columnIndex = 0,
 }: VirtualizedDayColumnProps) => {
   const listRef = useRef<List>(null)
   
@@ -74,7 +82,7 @@ const VirtualizedDayColumnComponent = ({
         height={height}
         itemCount={daySlots.length}
         itemSize={ITEM_SIZE}
-        itemData={{ daySlots }}
+        itemData={{ daySlots, columnIndex }}
         itemKey={(index, data) => data.daySlots[index].id}
         width="100%"
         className="scrollbar-hide"
@@ -86,4 +94,4 @@ const VirtualizedDayColumnComponent = ({
 }
 
 export const VirtualizedDayColumn = memo(VirtualizedDayColumnComponent, areEqual);
-VirtualizedDayColumn.displayName = "VirtualizedDayColumn" 
+VirtualizedDayColumn.displayName = "VirtualizedDayColumn"
