@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef} from "react";
+import { useRef, useState } from "react";
 import { createRoomAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,15 @@ import { Label } from "@/components/ui/label";
 
 export function AddRoomForm() {
   const formRef = useRef<HTMLFormElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleCreateRoom = async (formData: FormData) => {
+    setError(null); // Reset error on new submission
     const result = await createRoomAction(formData);
     if (result.success) {
       formRef.current?.reset();
     } else {
-      console.error('Failed to create room:', result.error);
+      setError(result.error ?? "Ett okänt fel inträffade.");
     }
   };
 
@@ -62,6 +64,9 @@ export function AddRoomForm() {
         >
           Skapa rum
         </Button>
+        {error && (
+          <p className="text-sm font-medium text-red-500 mt-2">{error}</p>
+        )}
       </form>
     </>
   );
