@@ -1,4 +1,4 @@
-import { memo, useMemo, useEffect, useState } from 'react';
+import { memo, useMemo } from 'react';
 import { startOfDay } from 'date-fns';
 import { VirtualizedDayColumn } from './VirtualizedDayColumn';
 import type { TimeSlot } from '@/lib/store/booking';
@@ -14,22 +14,11 @@ export const SlotsGrid = memo(({
   slotsByDay, 
   height 
 }: SlotsGridProps) => {
-  const [opacity, setOpacity] = useState(0);
-
-  useEffect(() => {
-    const animationFrameId = requestAnimationFrame(() => {
-      setOpacity(1);
-    });
-    return () => cancelAnimationFrame(animationFrameId);
-  }, []);
-
   const gridStyle = useMemo(() => ({
     display: "grid",
     gridTemplateColumns: `repeat(${dates.length}, minmax(0, 1fr))`,
     height: `${height}px`,
-    opacity: opacity,
-    transition: 'opacity 300ms ease-in-out',
-  }), [dates.length, height, opacity]);
+  }), [dates.length, height]);
 
   return (
     <div style={gridStyle}>

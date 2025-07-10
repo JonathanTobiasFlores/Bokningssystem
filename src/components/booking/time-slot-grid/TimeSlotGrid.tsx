@@ -16,7 +16,10 @@ interface TimeSlotGridProps {
 
 export function TimeSlotGrid({ height }: TimeSlotGridProps) {
   const { selectedDate, selectedRooms } = useBookingStore();
-  const { allSlots, isInitialLoading } = useTimeSlots(selectedDate, selectedRooms);
+  const { allSlots, isInitialLoading } = useTimeSlots(
+    selectedDate,
+    selectedRooms
+  );
   const dates = useDateRange(selectedDate);
   const slotsByDay = useSlotsByDay(dates, allSlots);
 
@@ -24,18 +27,17 @@ export function TimeSlotGrid({ height }: TimeSlotGridProps) {
     return <EmptyState />;
   }
 
-  if (isInitialLoading && selectedRooms.length > 0) {
+  if (isInitialLoading) {
     return <TimeSlotGridSkeleton selectedDate={selectedDate} />;
   }
 
   return (
     <GridContainer>
       <DateHeaders dates={dates} />
-      <SlotsGrid 
-        key={selectedDate.toISOString()}
-        dates={dates} 
-        slotsByDay={slotsByDay} 
-        height={height - 40} 
+      <SlotsGrid
+        dates={dates}
+        slotsByDay={slotsByDay}
+        height={height - 40}
       />
     </GridContainer>
   );
