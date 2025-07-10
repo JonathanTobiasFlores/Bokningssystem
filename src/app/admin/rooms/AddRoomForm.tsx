@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { createRoomAction } from "./actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,7 @@ export function AddRoomForm() {
     if (result.success) {
       formRef.current?.reset();
     } else {
-      // Here you could add logic to show an error message to the user
-      alert(`Fel: ${result.error}`);
+      console.error('Failed to create room:', result.error);
     }
   };
 
