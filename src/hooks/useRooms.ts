@@ -16,7 +16,10 @@ export function useRooms(options: { enabled: boolean }): UseRoomsReturn {
   const fetchRooms = useCallback(async () => {
     const abortController = new AbortController();
     
-    setIsLoading(true);
+    // Only show loading skeleton on initial load
+    if (rooms.length === 0) {
+      setIsLoading(true);
+    }
     setError(null);
 
     try {
@@ -44,7 +47,7 @@ export function useRooms(options: { enabled: boolean }): UseRoomsReturn {
     }
 
     return () => abortController.abort();
-  }, []);
+  }, [rooms.length]);
 
   useEffect(() => {
     if (options.enabled) {
