@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, Room as PrismaRoom } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { Room, RoomWithBookings } from "@/lib/types/room.types";
 import { toUTCDate } from "@/lib/utils/dateHelpers";
 
@@ -9,7 +9,14 @@ type PrismaRoomWithBookings = Prisma.RoomGetPayload<{
 export class RoomRepository {
   constructor(private prisma: PrismaClient) {}
 
-  private mapToRoom(room: any): Room {
+  private mapToRoom(room: {
+    id: number;
+    name: string;
+    capacity: number;
+    createdAt?: Date;
+    updatedAt?: Date;
+    deletedAt?: Date | null;
+  }): Room {
     if (!room || typeof room.id !== 'number' || typeof room.name !== 'string' || typeof room.capacity !== 'number') {
         throw new Error("Invalid room object received for mapping.");
     }

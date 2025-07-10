@@ -14,6 +14,10 @@ import { toUTCDate, getZonedTime } from '@/lib/utils/dateHelpers';
 import { config } from '@/lib/config';
 import { PrismaClient } from '@prisma/client';
 
+function isPrismaError(error: unknown): error is { code: string } {
+  return typeof error === 'object' && error !== null && 'code' in error;
+}
+
 export class BookingService {
   constructor(
     private prisma: PrismaClient,
@@ -92,9 +96,9 @@ export class BookingService {
           },
           tx
         );
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Handle unique constraint violation for race conditions
-        if (error.code === 'P2002') {
+        if (isPrismaError(error) && error.code === 'P2002') {
           throw new BookingConflictError(
             `Time slot ${data.startTime}-${data.endTime} is already booked`
           );

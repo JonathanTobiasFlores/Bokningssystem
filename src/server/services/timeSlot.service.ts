@@ -2,7 +2,6 @@ import { TimeSlotRepository } from "../repositories/timeSlot.repository";
 import { RoomRepository } from "../repositories/room.repository";
 import { eachDayOfInterval, formatISO, startOfDay } from "date-fns";
 import { toISOStringLocal } from "@/lib/utils/dateHelpers";
-import type { TimeSlot as PrismaTimeSlot } from '@prisma/client';
 
 interface GetAvailableTimeSlotsParams {
   startDate: Date;
