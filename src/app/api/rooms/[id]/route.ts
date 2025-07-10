@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { roomService } from '@/server/services';
+import { handleError } from '@/lib/utils/api-helpers';
 
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = await params;
     const numericId = Number(id);
     if (isNaN(numericId)) {
       return NextResponse.json(
@@ -23,10 +24,6 @@ export async function GET(
     }
     return NextResponse.json({ success: true, data: room });
   } catch (error) {
-    console.error('Error fetching room:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch room' },
-      { status: 500 }
-    );
+    return handleError(error);
   }
 } 
