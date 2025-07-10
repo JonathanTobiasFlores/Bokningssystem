@@ -63,18 +63,6 @@ const VirtualizedDayColumnComponent = ({
   
   const ITEM_SIZE = 58; // 48px button height + 10px spacing
   
-  if (daySlots.length === 0) {
-    return (
-      <div className="border-r border-[#BDBDBD] last:border-r-0 h-full">
-        <div className="h-full flex items-center justify-center">
-          <div className="text-center text-gray-500 text-sm">
-            Inga tider tillgängliga
-          </div>
-        </div>
-      </div>
-    )
-  }
-  
   return (
     <div className="border-r border-[#BDBDBD] last:border-r-0">
       <List

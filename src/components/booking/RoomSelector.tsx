@@ -17,47 +17,53 @@ export function RoomSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [allRooms, setAllRooms] = useState<Room[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const { selectedRooms, setSelectedRooms } = useBookingStore();
   const fetchInitiated = useRef(false);
+
+  const fetchRooms = async (signal: AbortSignal) => {
+    setIsLoading(true);
+    setFetchError(null); 
+    fetchInitiated.current = true; 
+
+    try {
+      const response = await fetch("/api/rooms", { signal });
+      if (!response.ok) {
+        throw new Error("Kunde inte hämta rummen. Försök igen.");
+      }
+      const data = await response.json();
+      if (!signal.aborted) {
+        setAllRooms(data.data);
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        console.error(error);
+        setFetchError(error.message);
+      }
+    } finally {
+      if (!signal.aborted) {
+        setIsLoading(false);
+      }
+    }
+  };
 
   useEffect(() => {
     // Only fetch if the popover is open and the fetch hasn't been initiated yet.
     if (isOpen && !fetchInitiated.current) {
       const abortController = new AbortController();
-      const signal = abortController.signal;
-
-      const fetchRooms = async () => {
-        setIsLoading(true);
-        fetchInitiated.current = true; // Mark that we've started the fetch
-
-        try {
-          const response = await fetch("/api/rooms", { signal });
-          if (!response.ok) {
-            throw new Error("Failed to fetch rooms");
-          }
-          const data = await response.json();
-          if (!signal.aborted) {
-            setAllRooms(data.data);
-          }
-        } catch (error) {
-          if (error instanceof Error && error.name !== 'AbortError') {
-            console.error(error);
-          }
-        } finally {
-          if (!signal.aborted) {
-            setIsLoading(false);
-          }
-        }
-      };
-
-      fetchRooms();
-
+      fetchRooms(abortController.signal);
       return () => {
         // When the component unmounts or the effect re-runs, abort the fetch.
         abortController.abort();
       };
     }
   }, [isOpen]);
+
+  const handleRetry = () => {
+    fetchInitiated.current = false; // Allow fetch to be re-initiated
+    const abortController = new AbortController();
+    fetchRooms(abortController.signal);
+  }
 
   const handleRoomSelect = (room: Room) => {
     const isSelected = selectedRooms.some((r) => r.id === room.id);
@@ -109,6 +115,13 @@ export function RoomSelector() {
         {isLoading ? (
           <div className="flex items-center justify-center min-h-[280px]">
             <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : fetchError ? (
+          <div className="flex flex-col items-center justify-center min-h-[280px] text-center">
+            <p className="text-red-600 mb-4">{fetchError}</p>
+            <Button onClick={handleRetry} variant="cta">
+              Försök igen
+            </Button>
           </div>
         ) : (
           <div className="space-y-4">
