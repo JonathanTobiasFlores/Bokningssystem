@@ -1,3 +1,4 @@
+# ⚠️ OBS!! ⚠️
 # Projektkontext
 Utvecklingstid: Detta projekt utvecklades under en 3-dagars period vid sidan av fulltidsarbete, vilket innebar totalt cirka 9-12 arbetstimmar fördelade.
 Prioriteringar: Med begränsad tid fokuserade jag på att leverera en fullt fungerande applikation med solid arkitektur snarare än att polera alla detaljer.
