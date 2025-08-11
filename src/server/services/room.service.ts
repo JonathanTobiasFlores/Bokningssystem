@@ -1,7 +1,5 @@
 import { RoomRepository } from '@/server/repositories/room.repository';
-import { generateTimeSlots } from '@/lib/utils/dateHelpers';
 import { z } from 'zod';
-import { RoomWithBookings } from '@/lib/types/room.types';
 
 const RoomSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters long."),
@@ -40,20 +38,6 @@ export class RoomService {
 
   async getAllRoomsWithDeleted() {
     return this.roomRepo.findAllWithDeleted();
-  }
-
-  async getRoomsWithAvailability(date: string) {
-    const rooms = await this.roomRepo.getRoomsWithAvailability(date);
-    const allSlots = generateTimeSlots();
-    
-    // Add availability info for each room
-    return rooms.map((room: RoomWithBookings) => ({
-      ...room,
-      timeSlots: allSlots.map(slot => ({
-        ...slot,
-        available: !room.bookedSlots.includes(`${slot.start}-${slot.end}`)
-      }))
-    }));
   }
 
   async getRoomById(id: number) {

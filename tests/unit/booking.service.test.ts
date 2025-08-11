@@ -11,12 +11,11 @@ import { makeBookingRepo, makeRoomRepo, makeTimeSlotRepo, makePrisma } from './m
 
 const baseBooking = {
   roomId: 1,
-  bookerName: 'Tester',
+  userName: 'Tester',
   date: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split('T')[0], // Tomorrow
   startTime: '08:00',
   endTime: '09:00',
   timeSlotId: 1,
-  userName: 'testuser',
 };
 
 describe('BookingService', () => {

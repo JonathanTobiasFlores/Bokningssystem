@@ -68,7 +68,7 @@ export async function bookSlotAction(
     }
   
     await bookingService.createBooking({
-      bookerName: name,
+      userName: name,
       roomId,
       date: toDBDateString(date),
       timeSlotId,

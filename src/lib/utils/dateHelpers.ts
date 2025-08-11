@@ -1,6 +1,5 @@
-import { format, parseISO, isBefore, addMinutes, addDays } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { formatISO as dateFnsFormatISO } from 'date-fns';
-import { sv } from 'date-fns/locale';
 import { toZonedTime as utcToZonedTime, fromZonedTime as zonedTimeToUtc } from 'date-fns-tz';
 
 // Always work with UTC in the database
@@ -23,28 +22,6 @@ export const toDBDateString = (date: Date | string): string => {
   return format(toUTCDate(date), 'yyyy-MM-dd');
 };
 
-// Parse slot datetime consistently (expects ISO date string and HH:mm startTime)
-export const parseSlotDateTime = (date: string, time: string): Date => {
-  return parseISO(`${date}T${time}:00.000Z`);
-};
-
-// Check if booking time has passed
-export const isBookingInPast = (
-  date: string,
-  startTime: string,
-  minNoticeMinutes = 15
-): boolean => {
-  const bookingTime = parseSlotDateTime(date, startTime);
-  const minBookingTime = addMinutes(new Date(), minNoticeMinutes);
-  return isBefore(bookingTime, minBookingTime);
-};
-
-// Format date consistently for display (e.g. 5 jan)
-export const formatDisplayDate = (date: Date | string): string => {
-  const parsed = typeof date === 'string' ? parseISO(date) : date;
-  return format(parsed, 'd MMM', { locale: sv });
-};
-
 // ISO string that preserves timezone information
 export const toISOStringLocal = (date: Date): string => {
   return dateFnsFormatISO(date);
@@ -52,28 +29,4 @@ export const toISOStringLocal = (date: Date): string => {
 
 export const getZonedTime = (date: Date, timeZone = 'Europe/Stockholm') => {
   return utcToZonedTime(date, timeZone);
-};
-
-/**
- * Generate time slots for the booking system
- *
- */
-export function generateTimeSlots() {
-  const slots = [];
-  const hours = [8, 10, 11, 13, 14, 16];
-
-  for (const hour of hours) {
-    const start = `${hour.toString().padStart(2, '0')}:00`;
-    const end = `${(hour + 1).toString().padStart(2, '0')}:00`;
-    slots.push({ start, end });
-  }
-
-  return slots;
-}
-
-/**
- * Get date range for the booking calendar
- */
-export function getDateRange(startDate: Date, days: number = 3): Date[] {
-  return Array.from({ length: days }, (_, i) => addDays(startDate, i));
-} 
+}; 

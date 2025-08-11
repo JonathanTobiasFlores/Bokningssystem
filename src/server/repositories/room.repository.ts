@@ -53,7 +53,7 @@ export class RoomRepository {
   }
 
   async findById(id: number): Promise<Room | null> {
-    const room = await this.prisma.room.findUnique({
+    const room = await this.prisma.room.findFirst({
       where: { id, deletedAt: null },
     });
     return room ? this.mapToRoom(room) : null;

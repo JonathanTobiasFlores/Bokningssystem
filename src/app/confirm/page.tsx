@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useActionState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useBookingStore } from "@/lib/store/booking";
 import { bookSlotAction, type FormState } from "./actions";
 import { Button } from "@/components/ui/button";
@@ -40,9 +40,9 @@ export default function ConfirmPage() {
 
   useEffect(() => {
     if (isClient && !selectedSlot) {
-      redirect("/");
+      router.replace("/");
     }
-  }, [selectedSlot, isClient]);
+  }, [selectedSlot, isClient, router]);
 
   useEffect(() => {
     if (state.message === "Bokning bekräftad!") {

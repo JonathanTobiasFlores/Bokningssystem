@@ -3,7 +3,6 @@ export interface Booking {
     roomId: number;
     timeSlotId: number;
     roomName: string;
-    bookerName: string;
     userName: string;
     date: string; // YYYY-MM-DD
     startTime: string; // HH:MM
@@ -13,14 +12,13 @@ export interface Booking {
     updatedAt: Date;
   }
 
-export type CreateBookingData = Omit<Booking, 'id' | 'roomName' | 'createdAt' | 'updatedAt' | 'userName'>;
+export type CreateBookingData = Omit<Booking, 'id' | 'roomName' | 'createdAt' | 'updatedAt'>;
 
 export interface BookingWithRoom {
   id: number;
   roomId: number;
   timeSlotId: number;
   userName: string;
-  bookerName?: string;
   date: Date;
   startTime: string;
   endTime: string;

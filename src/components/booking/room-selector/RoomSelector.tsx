@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useMemo, useCallback} from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   Popover,
   PopoverContent,
@@ -15,32 +15,29 @@ import { RoomSelectorActions } from "./RoomSelectorActions";
 import { RoomSelectorError } from "./RoomSelectorError";
 import { RoomSelectorSkeleton } from "./RoomSelectorSkeleton";
 import type { Room } from "@/lib/types/room.types";
-import React from "react";
 
-// Memoized trigger button component, now forwarding refs and props
-const RoomSelectorTrigger = memo(
-  React.forwardRef<
-    React.ElementRef<typeof Button>,
-    React.ComponentPropsWithoutRef<typeof Button> & { isOpen: boolean; triggerText: string }
-  >(({ isOpen, triggerText, ...props }, ref) => (
-    <Button
-      ref={ref}
-      variant="ghost"
-      className="font-helvetica w-[164px] h-[45px] justify-between p-4 rounded-lg border border-[#BDBDBD] text-[#212121] text-[18px] font-normal hover:text-[#212121]"
-      {...props}
-    >
-      {triggerText}{" "}
-      <ChevronDown
-        className={`h-4 w-4 transition-transform duration-200 ${
-          isOpen ? "rotate-180" : ""
-        }`}
-      />
-    </Button>
-  ))
-);
+// Trigger button component forwarding the native button ref
+const RoomSelectorTrigger = React.forwardRef<
+  HTMLButtonElement,
+  React.ComponentPropsWithoutRef<typeof Button> & { isOpen: boolean; triggerText: string }
+>(({ isOpen, triggerText, ...props }, ref) => (
+  <Button
+    ref={ref}
+    variant="ghost"
+    className="font-helvetica w-[164px] h-[45px] justify-between p-4 rounded-lg border border-[#BDBDBD] text-[#212121] text-[18px] font-normal hover:text-[#212121]"
+    {...props}
+  >
+    {triggerText}{" "}
+    <ChevronDown
+      className={`h-4 w-4 transition-transform duration-200 ${
+        isOpen ? "rotate-180" : ""
+      }`}
+    />
+  </Button>
+));
 RoomSelectorTrigger.displayName = "RoomSelectorTrigger";
 
-export const RoomSelector = memo(() => {
+export function RoomSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const { selectedRooms, setSelectedRooms } = useBookingStore();
   const { rooms, isLoading, error, refetch } = useRooms({ enabled: isOpen });
@@ -122,6 +119,4 @@ export const RoomSelector = memo(() => {
       </PopoverContent>
     </Popover>
   );
-});
-
-RoomSelector.displayName = "RoomSelector";
+}

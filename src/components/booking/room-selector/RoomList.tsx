@@ -1,4 +1,3 @@
-import { memo } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { Room } from '@/lib/types/room.types';
 
@@ -8,11 +7,7 @@ interface RoomListProps {
   onRoomSelect: (room: Room) => void;
 }
 
-export const RoomList = memo(({ 
-  rooms, 
-  selectedRooms, 
-  onRoomSelect 
-}: RoomListProps) => {
+export function RoomList({ rooms, selectedRooms, onRoomSelect }: RoomListProps) {
   return (
     <div className="space-y-4 max-h-[200px] overflow-y-auto pr-2 hide-scrollbar">
       {rooms.map((room) => (
@@ -35,6 +30,4 @@ export const RoomList = memo(({
       ))}
     </div>
   );
-});
-
-RoomList.displayName = 'RoomList';
+}

@@ -51,7 +51,7 @@ export class BookingRepository {
     const prismaClient = tx || this.prisma;
     const {
       roomId,
-      bookerName,
+      userName,
       date,
       startTime,
       endTime,
@@ -66,7 +66,7 @@ export class BookingRepository {
     const booking = await prismaClient.booking.create({
       data: {
         roomId,
-        userName: bookerName,
+        userName,
         date: toUTCDate(date),
         startTime,
         endTime,
@@ -113,7 +113,6 @@ export class BookingRepository {
       roomId: data.roomId,
       timeSlotId: data.timeSlotId,
       roomName: data.room.name,
-      bookerName: data.userName,
       userName: data.userName,
       date: toDBDateString(data.date),
       startTime: data.startTime,

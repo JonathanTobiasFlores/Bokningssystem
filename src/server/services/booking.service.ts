@@ -87,7 +87,7 @@ export class BookingService {
         return await this.bookingRepo.create(
           {
             roomId: data.roomId,
-            bookerName: data.bookerName,
+            userName: data.userName,
             date: data.date,
             startTime: data.startTime,
             endTime: data.endTime,
@@ -106,14 +106,5 @@ export class BookingService {
         throw error;
       }
     });
-  }
-
-  async cancelBooking(id: number): Promise<Booking> {
-    const booking = await this.bookingRepo.findById(id);
-    if (!booking) {
-      throw new Error('Booking not found');
-    }
-
-    return this.bookingRepo.update(id, { status: 'cancelled' });
   }
 }

@@ -1,4 +1,3 @@
-import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 
 interface RoomSelectorActionsProps {
@@ -6,10 +5,7 @@ interface RoomSelectorActionsProps {
   onDeselectAll: () => void;
 }
 
-export const RoomSelectorActions = memo(({ 
-  onConfirm, 
-  onDeselectAll 
-}: RoomSelectorActionsProps) => {
+export function RoomSelectorActions({ onConfirm, onDeselectAll }: RoomSelectorActionsProps) {
   return (
     <div className="flex justify-between items-center pt-4">
       <Button
@@ -26,6 +22,4 @@ export const RoomSelectorActions = memo(({
       </Button>
     </div>
   );
-});
-
-RoomSelectorActions.displayName = 'RoomSelectorActions';
+}
